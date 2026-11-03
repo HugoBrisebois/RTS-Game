@@ -1,0 +1,25 @@
+[gd_scene load_steps=3 format=3 uid="uid://bq3eraasn3emr"]
+
+[ext_resource type="Script" path="res://addons/Reproductor8Bits/Scripts/chiptune_player.gd" id="1_h748y"]
+[ext_resource type="Script" path="res://addons/Reproductor8Bits/Scripts/synth_channel.gd" id="2_vvogm"]
+
+[node name="ChiptunePlayer" type="Node"]
+script = ExtResource("1_h748y")
+
+[node name="Pulse1" type="AudioStreamPlayer" parent="."]
+script = ExtResource("2_vvogm")
+
+[node name="Pulse2" type="AudioStreamPlayer" parent="."]
+script = ExtResource("2_vvogm")
+
+[node name="Triangle" type="AudioStreamPlayer" parent="."]
+script = ExtResource("2_vvogm")
+wave_type = 1
+
+[node name="Noise" type="AudioStreamPlayer" parent="."]
+script = ExtResource("2_vvogm")
+wave_type = 2
+
+[node name="DPCM" type="AudioStreamPlayer" parent="."]
+script = ExtResource("2_vvogm")
+wave_type = 3

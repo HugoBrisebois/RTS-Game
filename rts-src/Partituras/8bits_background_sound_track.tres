@@ -1,0 +1,7 @@
+[gd_resource type="Resource" script_class="ChiptuneScore" format=3 uid="uid://b8f48ja2xkm27"]
+
+[ext_resource type="Script" uid="uid://d26cfwxi5q5vv" path="res://addons/Reproductor8Bits/Scripts/ChiptuneScore.gd" id="1_xe8kk"]
+
+[resource]
+script = ExtResource("1_xe8kk")
+track_id = ""

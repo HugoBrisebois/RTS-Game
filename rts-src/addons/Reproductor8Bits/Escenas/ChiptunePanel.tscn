@@ -1,0 +1,408 @@
+[gd_scene load_steps=6 format=3 uid="uid://bk5cjnaqj2hx7"]
+
+[ext_resource type="Script" path="res://addons/Reproductor8Bits/Scripts/chiptune_panel.gd" id="1_ax6yl"]
+[ext_resource type="StyleBox" uid="uid://xfge3uff0fxq" path="res://addons/Reproductor8Bits/Styles/Tema_TeclaBlanca.tres" id="2_0jg3r"]
+[ext_resource type="StyleBox" uid="uid://b4s0cr011f5it" path="res://addons/Reproductor8Bits/Styles/Tema_TeclaNegra.tres" id="3_kdd07"]
+[ext_resource type="StyleBox" uid="uid://dexipikevl88x" path="res://addons/Reproductor8Bits/Styles/Tema_TeclaBlanca_Pressed.tres" id="3_yl8tg"]
+[ext_resource type="StyleBox" uid="uid://cc51an4mpnj44" path="res://addons/Reproductor8Bits/Styles/Tema_TeclaNegra_Pressed.tres" id="5_72bnu"]
+
+[node name="ChiptunePanel" type="Control"]
+clip_contents = true
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+script = ExtResource("1_ax6yl")
+
+[node name="ReproductorPreview" type="AudioStreamPlayer" parent="."]
+
+[node name="VBoxContainer" type="VBoxContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="HBoxContainer" type="HBoxContainer" parent="VBoxContainer"]
+layout_mode = 2
+
+[node name="BtnRecargar" type="Button" parent="VBoxContainer/HBoxContainer"]
+layout_mode = 2
+text = "↻ Refresh"
+
+[node name="BtnCatalogo" type="Button" parent="VBoxContainer/HBoxContainer"]
+layout_mode = 2
+text = "📂 List"
+
+[node name="BtnPlay" type="Button" parent="VBoxContainer/HBoxContainer"]
+layout_mode = 2
+text = "▶ Play"
+
+[node name="BtnStop" type="Button" parent="VBoxContainer/HBoxContainer"]
+layout_mode = 2
+text = "⏹ Stop"
+
+[node name="BtnNuevo" type="Button" parent="VBoxContainer/HBoxContainer"]
+layout_mode = 2
+text = "➕ New"
+
+[node name="BtnEditarPartitura" type="Button" parent="VBoxContainer/HBoxContainer"]
+layout_mode = 2
+text = "✏ Edit"
+
+[node name="BtnBorrarPartitura" type="Button" parent="VBoxContainer/HBoxContainer"]
+layout_mode = 2
+text = "🗑️ Delete"
+
+[node name="BtnDonar" type="Button" parent="VBoxContainer/HBoxContainer"]
+layout_mode = 2
+text = "❤️Donate"
+
+[node name="HSplitContainer" type="HSplitContainer" parent="VBoxContainer"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="ItemList" type="ItemList" parent="VBoxContainer/HSplitContainer"]
+custom_minimum_size = Vector2(150, 0)
+layout_mode = 2
+size_flags_vertical = 3
+item_count = 2
+item_0/text = "SFX_ejemplo"
+item_1/text = "8bits_Test.tres"
+
+[node name="VBoxContainer" type="VBoxContainer" parent="VBoxContainer/HSplitContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="TrackerTree" type="Tree" parent="VBoxContainer/HSplitContainer/VBoxContainer"]
+layout_mode = 2
+size_flags_vertical = 3
+columns = 6
+column_titles_visible = true
+allow_rmb_select = true
+hide_folding = true
+hide_root = true
+select_mode = 2
+
+[node name="Lbl_Editando" type="Label" parent="VBoxContainer/HSplitContainer/VBoxContainer"]
+layout_mode = 2
+text = "✏ On Edit:"
+
+[node name="HSeparator" type="HSeparator" parent="VBoxContainer/HSplitContainer/VBoxContainer"]
+layout_mode = 2
+
+[node name="HBoxContainer" type="HBoxContainer" parent="VBoxContainer/HSplitContainer/VBoxContainer"]
+layout_mode = 2
+alignment = 1
+
+[node name="Lbl_Duracion" type="Label" parent="VBoxContainer/HSplitContainer/VBoxContainer/HBoxContainer"]
+layout_mode = 2
+text = "Duración: "
+
+[node name="SpnB_Duracion" type="SpinBox" parent="VBoxContainer/HSplitContainer/VBoxContainer/HBoxContainer"]
+layout_mode = 2
+min_value = 0.1
+max_value = 10.0
+step = 0.1
+page = 1.0
+value = 0.1
+
+[node name="BtnPreview" type="Button" parent="VBoxContainer/HSplitContainer/VBoxContainer/HBoxContainer"]
+layout_mode = 2
+text = "▶ Preview"
+
+[node name="Lbl_Octava" type="Label" parent="VBoxContainer/HSplitContainer/VBoxContainer/HBoxContainer"]
+layout_mode = 2
+text = "Octava:"
+
+[node name="SpB_Octava" type="SpinBox" parent="VBoxContainer/HSplitContainer/VBoxContainer/HBoxContainer"]
+layout_mode = 2
+min_value = 1.0
+max_value = 8.0
+value = 4.0
+
+[node name="ChkBtn_Grabar" type="CheckButton" parent="VBoxContainer/HSplitContainer/VBoxContainer/HBoxContainer"]
+layout_mode = 2
+text = "⏺ Grabar"
+
+[node name="ChkBtn_TodasLasCeldas" type="CheckButton" parent="VBoxContainer/HSplitContainer/VBoxContainer/HBoxContainer"]
+layout_mode = 2
+text = "Fila Completa"
+
+[node name="Btn_CortarNota" type="Button" parent="VBoxContainer/HSplitContainer/VBoxContainer/HBoxContainer"]
+layout_mode = 2
+text = "Cortar Nota (OFF)"
+
+[node name="Btn_Guardar" type="Button" parent="VBoxContainer/HSplitContainer/VBoxContainer/HBoxContainer"]
+layout_mode = 2
+text = "📼 Save"
+
+[node name="Lbl_Canal" type="Label" parent="VBoxContainer/HSplitContainer/VBoxContainer/HBoxContainer"]
+layout_mode = 2
+text = "Chanel: "
+
+[node name="Interfaz_Ajustes_Musica" type="HBoxContainer" parent="VBoxContainer/HSplitContainer/VBoxContainer"]
+layout_mode = 2
+
+[node name="ScrollContainer" type="ScrollContainer" parent="VBoxContainer/HSplitContainer/VBoxContainer/Interfaz_Ajustes_Musica"]
+custom_minimum_size = Vector2(400, 150)
+layout_mode = 2
+
+[node name="Interfaz_Resource_ChiptuneScore" type="GridContainer" parent="VBoxContainer/HSplitContainer/VBoxContainer/Interfaz_Ajustes_Musica/ScrollContainer"]
+custom_minimum_size = Vector2(150, 0)
+layout_mode = 2
+columns = 2
+
+[node name="Lbl_TrackID" type="Label" parent="VBoxContainer/HSplitContainer/VBoxContainer/Interfaz_Ajustes_Musica/ScrollContainer/Interfaz_Resource_ChiptuneScore"]
+layout_mode = 2
+text = "Track ID"
+
+[node name="Opt_TrackID" type="OptionButton" parent="VBoxContainer/HSplitContainer/VBoxContainer/Interfaz_Ajustes_Musica/ScrollContainer/Interfaz_Resource_ChiptuneScore"]
+custom_minimum_size = Vector2(250, 0)
+layout_mode = 2
+item_count = 3
+selected = 0
+popup/item_0/text = "SFX_ejemplo"
+popup/item_0/id = 0
+popup/item_1/text = "BGM_musica_menu"
+popup/item_1/id = 1
+popup/item_2/text = "SFX_salto"
+popup/item_2/id = 2
+
+[node name="Lbl_Tipo" type="Label" parent="VBoxContainer/HSplitContainer/VBoxContainer/Interfaz_Ajustes_Musica/ScrollContainer/Interfaz_Resource_ChiptuneScore"]
+layout_mode = 2
+text = "Tipo Pista"
+
+[node name="OptBtn_Tipo" type="OptionButton" parent="VBoxContainer/HSplitContainer/VBoxContainer/Interfaz_Ajustes_Musica/ScrollContainer/Interfaz_Resource_ChiptuneScore"]
+layout_mode = 2
+item_count = 5
+selected = 0
+popup/item_0/text = "BGM"
+popup/item_0/id = 0
+popup/item_1/text = "SFX"
+popup/item_1/id = 1
+popup/item_2/text = "Track_01"
+popup/item_2/id = 2
+popup/item_3/text = "Track_02"
+popup/item_3/id = 3
+popup/item_4/text = "Track_03"
+popup/item_4/id = 4
+
+[node name="Lbl_BusDestino" type="Label" parent="VBoxContainer/HSplitContainer/VBoxContainer/Interfaz_Ajustes_Musica/ScrollContainer/Interfaz_Resource_ChiptuneScore"]
+layout_mode = 2
+text = "Bus Destino"
+
+[node name="Txt_BusDestino" type="LineEdit" parent="VBoxContainer/HSplitContainer/VBoxContainer/Interfaz_Ajustes_Musica/ScrollContainer/Interfaz_Resource_ChiptuneScore"]
+layout_mode = 2
+
+[node name="Lbl_Loop" type="Label" parent="VBoxContainer/HSplitContainer/VBoxContainer/Interfaz_Ajustes_Musica/ScrollContainer/Interfaz_Resource_ChiptuneScore"]
+layout_mode = 2
+text = "Es Loop"
+
+[node name="Chb_Loop" type="CheckBox" parent="VBoxContainer/HSplitContainer/VBoxContainer/Interfaz_Ajustes_Musica/ScrollContainer/Interfaz_Resource_ChiptuneScore"]
+layout_mode = 2
+
+[node name="Lbl_Ticks" type="Label" parent="VBoxContainer/HSplitContainer/VBoxContainer/Interfaz_Ajustes_Musica/ScrollContainer/Interfaz_Resource_ChiptuneScore"]
+layout_mode = 2
+text = "Ticks"
+
+[node name="Spnb_Ticks" type="SpinBox" parent="VBoxContainer/HSplitContainer/VBoxContainer/Interfaz_Ajustes_Musica/ScrollContainer/Interfaz_Resource_ChiptuneScore"]
+layout_mode = 2
+
+[node name="Lbl_FPS" type="Label" parent="VBoxContainer/HSplitContainer/VBoxContainer/Interfaz_Ajustes_Musica/ScrollContainer/Interfaz_Resource_ChiptuneScore"]
+layout_mode = 2
+text = "FPS"
+
+[node name="Spnb_FPS" type="SpinBox" parent="VBoxContainer/HSplitContainer/VBoxContainer/Interfaz_Ajustes_Musica/ScrollContainer/Interfaz_Resource_ChiptuneScore"]
+layout_mode = 2
+
+[node name="Lbl_OctavaBase" type="Label" parent="VBoxContainer/HSplitContainer/VBoxContainer/Interfaz_Ajustes_Musica/ScrollContainer/Interfaz_Resource_ChiptuneScore"]
+layout_mode = 2
+text = "Octava"
+
+[node name="Spnb_OctavaBase" type="SpinBox" parent="VBoxContainer/HSplitContainer/VBoxContainer/Interfaz_Ajustes_Musica/ScrollContainer/Interfaz_Resource_ChiptuneScore"]
+layout_mode = 2
+
+[node name="HSeparator" type="HSeparator" parent="VBoxContainer/HSplitContainer/VBoxContainer/Interfaz_Ajustes_Musica/ScrollContainer/Interfaz_Resource_ChiptuneScore"]
+layout_mode = 2
+
+[node name="HSeparator2" type="HSeparator" parent="VBoxContainer/HSplitContainer/VBoxContainer/Interfaz_Ajustes_Musica/ScrollContainer/Interfaz_Resource_ChiptuneScore"]
+layout_mode = 2
+
+[node name="Lbl_Vacio" type="Label" parent="VBoxContainer/HSplitContainer/VBoxContainer/Interfaz_Ajustes_Musica/ScrollContainer/Interfaz_Resource_ChiptuneScore"]
+layout_mode = 2
+
+[node name="Lbl_Decays" type="Label" parent="VBoxContainer/HSplitContainer/VBoxContainer/Interfaz_Ajustes_Musica/ScrollContainer/Interfaz_Resource_ChiptuneScore"]
+layout_mode = 2
+text = "Decays"
+
+[node name="HSeparator3" type="HSeparator" parent="VBoxContainer/HSplitContainer/VBoxContainer/Interfaz_Ajustes_Musica/ScrollContainer/Interfaz_Resource_ChiptuneScore"]
+layout_mode = 2
+
+[node name="HSeparator4" type="HSeparator" parent="VBoxContainer/HSplitContainer/VBoxContainer/Interfaz_Ajustes_Musica/ScrollContainer/Interfaz_Resource_ChiptuneScore"]
+layout_mode = 2
+
+[node name="Lbl_DecayP1" type="Label" parent="VBoxContainer/HSplitContainer/VBoxContainer/Interfaz_Ajustes_Musica/ScrollContainer/Interfaz_Resource_ChiptuneScore"]
+layout_mode = 2
+text = "Pulse 1
+"
+
+[node name="Spnb_DecayP1" type="SpinBox" parent="VBoxContainer/HSplitContainer/VBoxContainer/Interfaz_Ajustes_Musica/ScrollContainer/Interfaz_Resource_ChiptuneScore"]
+layout_mode = 2
+
+[node name="Lbl_DecayP2" type="Label" parent="VBoxContainer/HSplitContainer/VBoxContainer/Interfaz_Ajustes_Musica/ScrollContainer/Interfaz_Resource_ChiptuneScore"]
+layout_mode = 2
+text = "Pulse 2"
+
+[node name="Spnb_DecayP2" type="SpinBox" parent="VBoxContainer/HSplitContainer/VBoxContainer/Interfaz_Ajustes_Musica/ScrollContainer/Interfaz_Resource_ChiptuneScore"]
+layout_mode = 2
+
+[node name="Lbl_DecayTriangle" type="Label" parent="VBoxContainer/HSplitContainer/VBoxContainer/Interfaz_Ajustes_Musica/ScrollContainer/Interfaz_Resource_ChiptuneScore"]
+layout_mode = 2
+text = "Triangle"
+
+[node name="Spnb_DecayTriangle" type="SpinBox" parent="VBoxContainer/HSplitContainer/VBoxContainer/Interfaz_Ajustes_Musica/ScrollContainer/Interfaz_Resource_ChiptuneScore"]
+layout_mode = 2
+
+[node name="Lbl_DecayNoise" type="Label" parent="VBoxContainer/HSplitContainer/VBoxContainer/Interfaz_Ajustes_Musica/ScrollContainer/Interfaz_Resource_ChiptuneScore"]
+layout_mode = 2
+text = "Noise"
+
+[node name="Spnb_DecayNoise" type="SpinBox" parent="VBoxContainer/HSplitContainer/VBoxContainer/Interfaz_Ajustes_Musica/ScrollContainer/Interfaz_Resource_ChiptuneScore"]
+layout_mode = 2
+
+[node name="Lbl_DecayDPCM" type="Label" parent="VBoxContainer/HSplitContainer/VBoxContainer/Interfaz_Ajustes_Musica/ScrollContainer/Interfaz_Resource_ChiptuneScore"]
+layout_mode = 2
+text = "DPCM"
+
+[node name="Spnb_DecayDPCM" type="SpinBox" parent="VBoxContainer/HSplitContainer/VBoxContainer/Interfaz_Ajustes_Musica/ScrollContainer/Interfaz_Resource_ChiptuneScore"]
+layout_mode = 2
+
+[node name="PianoUI" type="Control" parent="VBoxContainer/HSplitContainer/VBoxContainer/Interfaz_Ajustes_Musica"]
+layout_mode = 2
+
+[node name="TeclasBlancas" type="HBoxContainer" parent="VBoxContainer/HSplitContainer/VBoxContainer/Interfaz_Ajustes_Musica/PianoUI"]
+layout_mode = 0
+offset_right = 40.0
+offset_bottom = 40.0
+
+[node name="C" type="Button" parent="VBoxContainer/HSplitContainer/VBoxContainer/Interfaz_Ajustes_Musica/PianoUI/TeclasBlancas"]
+custom_minimum_size = Vector2(40, 120)
+layout_mode = 2
+theme_override_styles/normal = ExtResource("2_0jg3r")
+theme_override_styles/hover = ExtResource("2_0jg3r")
+theme_override_styles/pressed = ExtResource("3_yl8tg")
+text = "C-"
+
+[node name="D" type="Button" parent="VBoxContainer/HSplitContainer/VBoxContainer/Interfaz_Ajustes_Musica/PianoUI/TeclasBlancas"]
+custom_minimum_size = Vector2(40, 120)
+layout_mode = 2
+theme_override_styles/normal = ExtResource("2_0jg3r")
+theme_override_styles/hover = ExtResource("2_0jg3r")
+theme_override_styles/pressed = ExtResource("3_yl8tg")
+text = "D-"
+
+[node name="E" type="Button" parent="VBoxContainer/HSplitContainer/VBoxContainer/Interfaz_Ajustes_Musica/PianoUI/TeclasBlancas"]
+custom_minimum_size = Vector2(40, 120)
+layout_mode = 2
+theme_override_styles/normal = ExtResource("2_0jg3r")
+theme_override_styles/hover = ExtResource("2_0jg3r")
+theme_override_styles/pressed = ExtResource("3_yl8tg")
+text = "E-"
+
+[node name="F" type="Button" parent="VBoxContainer/HSplitContainer/VBoxContainer/Interfaz_Ajustes_Musica/PianoUI/TeclasBlancas"]
+custom_minimum_size = Vector2(40, 120)
+layout_mode = 2
+theme_override_styles/normal = ExtResource("2_0jg3r")
+theme_override_styles/hover = ExtResource("2_0jg3r")
+theme_override_styles/pressed = ExtResource("3_yl8tg")
+text = "F-"
+
+[node name="G" type="Button" parent="VBoxContainer/HSplitContainer/VBoxContainer/Interfaz_Ajustes_Musica/PianoUI/TeclasBlancas"]
+custom_minimum_size = Vector2(40, 120)
+layout_mode = 2
+theme_override_styles/normal = ExtResource("2_0jg3r")
+theme_override_styles/hover = ExtResource("2_0jg3r")
+theme_override_styles/pressed = ExtResource("3_yl8tg")
+text = "G-"
+
+[node name="A" type="Button" parent="VBoxContainer/HSplitContainer/VBoxContainer/Interfaz_Ajustes_Musica/PianoUI/TeclasBlancas"]
+custom_minimum_size = Vector2(40, 120)
+layout_mode = 2
+theme_override_styles/normal = ExtResource("2_0jg3r")
+theme_override_styles/hover = ExtResource("2_0jg3r")
+theme_override_styles/pressed = ExtResource("3_yl8tg")
+text = "A-"
+
+[node name="B" type="Button" parent="VBoxContainer/HSplitContainer/VBoxContainer/Interfaz_Ajustes_Musica/PianoUI/TeclasBlancas"]
+custom_minimum_size = Vector2(40, 120)
+layout_mode = 2
+theme_override_styles/normal = ExtResource("2_0jg3r")
+theme_override_styles/hover = ExtResource("2_0jg3r")
+theme_override_styles/pressed = ExtResource("3_yl8tg")
+text = "B-"
+
+[node name="TeclasNegras" type="Control" parent="VBoxContainer/HSplitContainer/VBoxContainer/Interfaz_Ajustes_Musica/PianoUI"]
+anchors_preset = 0
+offset_right = 40.0
+offset_bottom = 40.0
+
+[node name="C_Sostenido" type="Button" parent="VBoxContainer/HSplitContainer/VBoxContainer/Interfaz_Ajustes_Musica/PianoUI/TeclasNegras"]
+custom_minimum_size = Vector2(25, 50)
+layout_mode = 0
+offset_left = 29.5
+offset_right = 54.5
+offset_bottom = 50.0
+theme_override_styles/normal = ExtResource("3_kdd07")
+theme_override_styles/hover = ExtResource("3_kdd07")
+theme_override_styles/pressed = ExtResource("5_72bnu")
+text = "C#"
+
+[node name="D_Sostenido" type="Button" parent="VBoxContainer/HSplitContainer/VBoxContainer/Interfaz_Ajustes_Musica/PianoUI/TeclasNegras"]
+custom_minimum_size = Vector2(25, 50)
+layout_mode = 0
+offset_left = 73.5
+offset_right = 98.5
+offset_bottom = 50.0
+theme_override_styles/normal = ExtResource("3_kdd07")
+theme_override_styles/hover = ExtResource("3_kdd07")
+theme_override_styles/pressed = ExtResource("5_72bnu")
+text = "D#"
+
+[node name="F_Sostenido" type="Button" parent="VBoxContainer/HSplitContainer/VBoxContainer/Interfaz_Ajustes_Musica/PianoUI/TeclasNegras"]
+custom_minimum_size = Vector2(25, 50)
+layout_mode = 0
+offset_left = 161.5
+offset_right = 186.5
+offset_bottom = 50.0
+theme_override_styles/normal = ExtResource("3_kdd07")
+theme_override_styles/hover = ExtResource("3_kdd07")
+theme_override_styles/pressed = ExtResource("5_72bnu")
+text = "F#"
+
+[node name="G_Sostenido" type="Button" parent="VBoxContainer/HSplitContainer/VBoxContainer/Interfaz_Ajustes_Musica/PianoUI/TeclasNegras"]
+custom_minimum_size = Vector2(25, 50)
+layout_mode = 0
+offset_left = 205.5
+offset_right = 230.5
+offset_bottom = 50.0
+theme_override_styles/normal = ExtResource("3_kdd07")
+theme_override_styles/hover = ExtResource("3_kdd07")
+theme_override_styles/pressed = ExtResource("5_72bnu")
+text = "G#"
+
+[node name="A_Sostenido" type="Button" parent="VBoxContainer/HSplitContainer/VBoxContainer/Interfaz_Ajustes_Musica/PianoUI/TeclasNegras"]
+custom_minimum_size = Vector2(25, 50)
+layout_mode = 0
+offset_left = 249.5
+offset_right = 274.5
+offset_bottom = 50.0
+theme_override_styles/normal = ExtResource("3_kdd07")
+theme_override_styles/hover = ExtResource("3_kdd07")
+theme_override_styles/pressed = ExtResource("5_72bnu")
+text = "A#"
