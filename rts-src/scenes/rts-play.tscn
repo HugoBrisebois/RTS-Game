@@ -1,7 +1,7 @@
 [gd_scene format=3 uid="uid://nb5166pk35dm"]
 
-[ext_resource type="Script" uid="uid://b384bfxrxrls2" path="res://scripts/camera_2d.gd" id="1_a6mx5"]
-[ext_resource type="Script" uid="uid://dlgmtkneydyib" path="res://scripts/ui-play.gd" id="1_dkyu7"]
+[ext_resource type="Script" uid="uid://dbtq5s545fe8e" path="res://scripts/game_state_machine.gd" id="1_c16mr"]
+[ext_resource type="Script" uid="uid://dea0rkrf0hdin" path="res://scripts/camera.gd" id="2_jptbk"]
 [ext_resource type="Texture2D" uid="uid://bs7sffhcf4smq" path="res://icon.svg" id="3_c16mr"]
 
 [sub_resource type="TileSet" id="TileSet_4npm0"]
@@ -9,12 +9,13 @@ tile_shape = 1
 tile_size = Vector2i(64, 32)
 
 [node name="Node2D" type="Node2D" unique_id=1682764252]
+script = ExtResource("1_c16mr")
 
 [node name="Camera2D" type="Camera2D" parent="." unique_id=1873432646]
-position = Vector2(576, 324)
+position = Vector2(288, 162)
 zoom = Vector2(2, 2)
 position_smoothing_enabled = true
-script = ExtResource("1_a6mx5")
+script = ExtResource("2_jptbk")
 
 [node name="TileMapLayer" type="TileMapLayer" parent="." unique_id=420762742]
 tile_set = SubResource("TileSet_4npm0")
@@ -25,30 +26,35 @@ tile_set = SubResource("TileSet_4npm0")
 
 [node name="building_container" type="Node" parent="." unique_id=755108043]
 
-[node name="Control" type="Control" parent="." unique_id=735025868]
-layout_mode = 3
-anchors_preset = 0
-offset_right = 1159.0
-offset_bottom = 648.0
-script = ExtResource("1_dkyu7")
-
-[node name="GridContainer" type="GridContainer" parent="Control" unique_id=1619094173]
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-offset_left = 900.0
-offset_top = 454.0
-offset_right = -4.0
-offset_bottom = -6.0
-grow_horizontal = 2
-grow_vertical = 2
-
-[node name="move" type="Button" parent="Control/GridContainer" unique_id=105673312]
-layout_mode = 2
-
 [node name="Icon" type="Sprite2D" parent="." unique_id=1458123695]
-position = Vector2(588, 324)
+position = Vector2(270, 154)
 texture = ExtResource("3_c16mr")
 
-[connection signal="pressed" from="Control/GridContainer/move" to="Control" method="_on_button_pressed"]
+[node name="CanvasLayer" type="CanvasLayer" parent="." unique_id=1841911248]
+
+[node name="Control" type="Control" parent="CanvasLayer" unique_id=735025868]
+layout_mode = 3
+anchor_right = -0.0017361111
+offset_right = 578.0
+offset_bottom = 325.0
+size_flags_horizontal = 8
+size_flags_vertical = 8
+metadata/_edit_use_anchors_ = true
+
+[node name="GridContainer" type="GridContainer" parent="CanvasLayer/Control" unique_id=1619094173]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.9965398
+anchor_top = 1.0030769
+anchor_right = 0.9965398
+anchor_bottom = 1.0030769
+offset_left = -111.0
+offset_top = -91.0
+grow_horizontal = 0
+grow_vertical = 0
+metadata/_edit_use_anchors_ = true
+
+[node name="move" type="Button" parent="CanvasLayer/Control/GridContainer" unique_id=105673312]
+layout_mode = 2
+
+[connection signal="pressed" from="CanvasLayer/Control/GridContainer/move" to="CanvasLayer/Control" method="_on_button_pressed"]
