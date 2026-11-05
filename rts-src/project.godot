@@ -61,6 +61,12 @@ right_click={
 ]
 }
 
+[layer_names]
+
+2d_render/layer_1="terain"
+2d_render/layer_2="units"
+2d_render/layer_3="resources"
+
 [physics]
 
 3d/physics_engine="Jolt Physics"
