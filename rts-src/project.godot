@@ -66,6 +66,9 @@ right_click={
 2d_render/layer_1="terain"
 2d_render/layer_2="units"
 2d_render/layer_3="resources"
+2d_navigation/layer_1="ground"
+2d_navigation/layer_2="ramp"
+2d_navigation/layer_3="elevation"
 
 [physics]
 

@@ -1,0 +1,18 @@
+[gd_scene format=3 uid="uid://bs0b0uh2glrao"]
+
+[ext_resource type="Script" uid="uid://dea0rkrf0hdin" path="res://scripts/camera.gd" id="1_nt7q6"]
+
+[node name="UI" type="CanvasLayer" unique_id=2071038511]
+
+[node name="Camera2D" type="Camera2D" parent="." unique_id=1507124307]
+position = Vector2(288, 162)
+limit_left = -1345
+limit_top = -385
+limit_right = 12544
+limit_bottom = 5490
+position_smoothing_enabled = true
+script = ExtResource("1_nt7q6")
+
+[node name="Panel" type="Panel" parent="." unique_id=1261601046]
+offset_right = 40.0
+offset_bottom = 40.0
