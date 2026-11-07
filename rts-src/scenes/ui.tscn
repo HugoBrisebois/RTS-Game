@@ -12,7 +12,3 @@ limit_right = 12544
 limit_bottom = 5490
 position_smoothing_enabled = true
 script = ExtResource("1_nt7q6")
-
-[node name="Panel" type="Panel" parent="." unique_id=1261601046]
-offset_right = 40.0
-offset_bottom = 40.0
