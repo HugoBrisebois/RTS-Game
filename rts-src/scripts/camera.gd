@@ -39,7 +39,7 @@ func _unhandled_input(event: InputEvent) -> void:
 	_handle_zoom_input(event)
 	_handle_selection_input(event)
 
-# --- Drawing Logic (Using Canvas Transform for accurate screen-to-world rendering) ---
+# --- Drawing Logic ---
 func _draw() -> void:
 	if not is_drag_selecting:
 		return
@@ -47,7 +47,6 @@ func _draw() -> void:
 	if drag_start_screen.distance_to(drag_current_screen) < drag_threshold:
 		return
 
-	# Convert screen drag points to local camera/canvas space
 	var xform = get_canvas_transform().affine_inverse()
 	var local_start = xform * drag_start_screen
 	var local_current = xform * drag_current_screen
@@ -62,6 +61,7 @@ func _draw() -> void:
 # --- Selection Handling ---
 func _handle_selection_input(event: InputEvent) -> void:
 	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT:
+		print("Left mouse button event detected!")
 		if event.pressed:
 			is_drag_selecting = true
 			drag_start_screen = event.position

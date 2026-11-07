@@ -2,6 +2,7 @@ class_name Unit
 extends CharacterBody2D
 
 var is_selected: bool = false
+var target_pos
 
 # visual indicator sprite color change
 @onready var sprite: AnimatedSprite2D = $AnimatedSprite2D
@@ -12,3 +13,6 @@ func set_selected(selected: bool) -> void:
 		sprite.modulate = Color(0.2, 1.0, 0.2)
 	else:
 		sprite.modulate = Color(1.0, 1.0, 1.0)
+
+func move_unit() -> void:
+	pass
