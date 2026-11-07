@@ -151,3 +151,5 @@ func _handle_zoom(delta: float) -> void:
 func _screen_to_local(screen_pos: Vector2) -> Vector2:
 	var viewport_center: Vector2 = get_viewport_rect().size * 0.5
 	return (screen_pos - viewport_center) / zoom
+	
+	

@@ -1,49 +1,23 @@
 extends Node2D
 
-var dragging := false
-var start_pos := Vector2.ZERO # screen coordinates for drawing
-var end_pos := Vector2.ZERO
+@onready var camera: RTSCamera = $UI/Camera2D 
 
-# Called when the node enters the scene tree for the first time.
-func _unhandled_input(event: InputEvent) -> void:
-	# Left click selection
-	if event.is_action_pressed("select"):
-		dragging = true
-		start_pos = get_viewport().get_mouse_position()
-		end_pos = start_pos
-		
-	if event is InputEventMouseMotion and dragging:
-		end_pos = get_viewport().get_mouse_position()
-		queue_redraw() # tells Godot to run the _draw function
-	if event.is_action_released("select") and dragging:
-		dragging = false
-		queue_redraw()
-		determine_selection()
-	
-	# Right Click command to move units
-	if event.is_action_pressed("right_click"):
-		var target_destination := get_global_mouse_position()
-		print("commanding units to move to world coordinates: ", target_destination)
-		
-		# TODO: add unit movement
-		
-		
+func _ready() -> void:
+	# Connect the signal emitted from the camera script
+	camera.selection_completed.connect(_on_camera_selection_completed)
 
-func _draw() -> void:
-	# draws slection box on screen relative to the camea
-	if dragging:
-		# Must account for the camera position
-		var cam_offset := get_viewport().get_camera_2d().get_screen_center_position() - (get_viewport().get_visible_rect().size / 2)
-		var box_start := start_pos + cam_offset
-		var box_end := end_pos + cam_offset
-		
-		draw_rect(Rect2(box_start, box_end - box_start), Color(0, 1, 0, 0.15), true)
-		draw_rect(Rect2(box_start, box_end - box_start), Color(0, 1, 0, 0.8), false,1.5)
+func _on_camera_selection_completed(world_rect: Rect2) -> void:
+	# Clear previous selections if shift isn't held (optional)
+	var selected_units = []
 
-func determine_selection() -> void:
-	var start_world := get_global_mouse_position()
-	if start_pos.distance_to(end_pos) <5 :
-		print("single unit clicked at world coordinates: ", start_world)
-		# TODO: add a full unit selection method
-	else:
-		print("Box selection released")
+	# Loop through all nodes in the "units" group
+	for node in get_tree().get_nodes_in_group("units"):
+		if node is Unit:
+			# Check if the unit's global position falls inside the selection Rect2
+			if world_rect.has_point(node.global_position):
+				node.set_selected(true)
+				selected_units.append(node)
+			else:
+				node.set_selected(false)
+				
+	print("Selected units count: ", selected_units.size())
