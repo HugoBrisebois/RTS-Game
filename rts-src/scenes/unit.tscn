@@ -1,6 +1,6 @@
 [gd_scene format=3 uid="uid://cwwiw8ajqde52"]
 
-[ext_resource type="Script" uid="uid://fohs43qxyea6" path="res://scenes/unit.gd" id="1_k673f"]
+[ext_resource type="Script" uid="uid://fohs43qxyea6" path="res://scripts/unit.gd" id="1_k673f"]
 [ext_resource type="Texture2D" uid="uid://cmdrh4ku4fvkx" path="res://Assets/Units/Black Units/Pawn/Pawn_Idle Axe.png" id="2_1jvru"]
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_iwt62"]

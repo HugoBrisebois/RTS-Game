@@ -1,8 +1,6 @@
 class_name RTSCamera
 extends Camera2D
 
-## Emitted when the user completes a drag-box selection.
-## Provides the selection rectangle in World Coordinates so units can be queried.
 signal selection_completed(world_rect: Rect2)
 
 @export_category("Movement Settings")
@@ -22,7 +20,6 @@ signal selection_completed(world_rect: Rect2)
 @export var box_border_width: float = 2.0
 @export var drag_threshold: float = 5.0
 
-# Dynamic state variables
 var target_zoom: Vector2 = Vector2.ONE
 var is_drag_selecting: bool = false
 var drag_start_screen: Vector2 = Vector2.ZERO
@@ -42,25 +39,23 @@ func _unhandled_input(event: InputEvent) -> void:
 	_handle_zoom_input(event)
 	_handle_selection_input(event)
 
-# --- Drawing Logic ---
+# --- Drawing Logic (Using Canvas Transform for accurate screen-to-world rendering) ---
 func _draw() -> void:
 	if not is_drag_selecting:
 		return
 
-	# Only render if the drag distance exceeds the threshold
 	if drag_start_screen.distance_to(drag_current_screen) < drag_threshold:
 		return
 
-	# Convert screen coordinates to local points relative to this camera node
-	var local_start: Vector2 = _screen_to_local(drag_start_screen)
-	var local_current: Vector2 = _screen_to_local(drag_current_screen)
+	# Convert screen drag points to local camera/canvas space
+	var xform = get_canvas_transform().affine_inverse()
+	var local_start = xform * drag_start_screen
+	var local_current = xform * drag_current_screen
 
-	# Calculate top-left corner and size for canonical Rect2
 	var top_left: Vector2 = Vector2(min(local_start.x, local_current.x), min(local_start.y, local_current.y))
 	var size: Vector2 = (local_start - local_current).abs()
 	var rect: Rect2 = Rect2(top_left, size)
 
-	# Draw semi-transparent fill and outer border
 	draw_rect(rect, box_fill_color, true)
 	draw_rect(rect, box_border_color, false, box_border_width)
 
@@ -84,20 +79,19 @@ func _handle_selection_input(event: InputEvent) -> void:
 		queue_redraw()
 
 func _emit_selection_completed() -> void:
-	# Transform screen points directly to World Coordinates using the camera's canvas transform
-	var transform_inv = get_canvas_transform().affine_inverse()
-	var world_start: Vector2 = transform_inv * drag_start_screen
-	var world_current: Vector2 = transform_inv * drag_current_screen
+	var xform = get_canvas_transform().affine_inverse()
+	var world_start: Vector2 = xform * drag_start_screen
+	var world_current: Vector2 = xform * drag_current_screen
 
 	var top_left: Vector2 = Vector2(min(world_start.x, world_current.x), min(world_start.y, world_current.y))
 	var size: Vector2 = (world_start - world_current).abs()
 
 	selection_completed.emit(Rect2(top_left, size))
+
 # --- Camera Movement & Panning ---
 func _handle_movement(delta: float) -> void:
 	var input_vector: Vector2 = Vector2.ZERO
 
-	# Keyboard WASD / Arrow Keys
 	if Input.is_action_pressed("ui_right") or Input.is_key_pressed(KEY_D):
 		input_vector.x += 1.0
 	if Input.is_action_pressed("ui_left") or Input.is_key_pressed(KEY_A):
@@ -107,7 +101,6 @@ func _handle_movement(delta: float) -> void:
 	if Input.is_action_pressed("ui_up") or Input.is_key_pressed(KEY_W):
 		input_vector.y -= 1.0
 
-	# Mouse Edge Scrolling
 	if enable_edge_scrolling and not is_panning:
 		var viewport_rect: Rect2 = get_viewport().get_visible_rect()
 		var mouse_pos: Vector2 = get_viewport().get_mouse_position()
@@ -137,7 +130,6 @@ func _handle_panning_input(event: InputEvent) -> void:
 		position += delta
 		pan_start_position = event.position
 
-# --- Camera Zooming ---
 func _handle_zoom_input(event: InputEvent) -> void:
 	if event is InputEventMouseButton and event.pressed:
 		if event.button_index == MOUSE_BUTTON_WHEEL_UP:
@@ -147,10 +139,3 @@ func _handle_zoom_input(event: InputEvent) -> void:
 
 func _handle_zoom(delta: float) -> void:
 	zoom = zoom.lerp(target_zoom, zoom_smoothness * delta)
-
-# --- Coordinate Helper ---
-func _screen_to_local(screen_pos: Vector2) -> Vector2:
-	var viewport_center: Vector2 = get_viewport_rect().size * 0.5
-	return (screen_pos - viewport_center) / zoom
-	
-	
