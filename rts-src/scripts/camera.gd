@@ -84,14 +84,15 @@ func _handle_selection_input(event: InputEvent) -> void:
 		queue_redraw()
 
 func _emit_selection_completed() -> void:
-	var world_start: Vector2 = get_screen_center_position() + _screen_to_local(drag_start_screen)
-	var world_current: Vector2 = get_screen_center_position() + _screen_to_local(drag_current_screen)
+	# Transform screen points directly to World Coordinates using the camera's canvas transform
+	var transform_inv = get_canvas_transform().affine_inverse()
+	var world_start: Vector2 = transform_inv * drag_start_screen
+	var world_current: Vector2 = transform_inv * drag_current_screen
 
 	var top_left: Vector2 = Vector2(min(world_start.x, world_current.x), min(world_start.y, world_current.y))
 	var size: Vector2 = (world_start - world_current).abs()
 
 	selection_completed.emit(Rect2(top_left, size))
-
 # --- Camera Movement & Panning ---
 func _handle_movement(delta: float) -> void:
 	var input_vector: Vector2 = Vector2.ZERO
