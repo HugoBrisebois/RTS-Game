@@ -1,0 +1,23 @@
+[gd_scene format=3 uid="uid://7uplf2vtk6yl"]
+
+[ext_resource type="Script" uid="uid://c5svxnhdbhap" path="res://scripts/castle.gd" id="1_bly62"]
+[ext_resource type="Texture2D" uid="uid://dlufsdcrbt670" path="res://Assets/Buildings/Black Buildings/Castle.png" id="2_0ysgy"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_qqcy4"]
+size = Vector2(311, 208)
+
+[node name="Building" type="StaticBody2D" unique_id=220378880]
+script = ExtResource("1_bly62")
+
+[node name="Sprite2D" type="Sprite2D" parent="." unique_id=1587386872]
+texture = ExtResource("2_0ysgy")
+
+[node name="CollisionShape2D2" type="CollisionShape2D" parent="." unique_id=295892693]
+position = Vector2(-0.5, 19)
+shape = SubResource("RectangleShape2D_qqcy4")
+
+[node name="InteractionArea" type="Area2D" parent="." unique_id=869779884]
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="InteractionArea" unique_id=1127670049]
+position = Vector2(-0.5, 19)
+shape = SubResource("RectangleShape2D_qqcy4")
