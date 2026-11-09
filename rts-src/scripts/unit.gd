@@ -5,12 +5,15 @@ var is_selected: bool = false
 var target_pos = null
 
 # move speed variable
-@export var move_speed : float = 200.0 
+@export var move_speed: float = 200.0 
+@export var unit_name: String = "Generic Unit"
+@export var max_health: float = 200.0
+
+var current_health: int = 100
 
 # visual indicator sprite color change
 @onready var sprite: AnimatedSprite2D = $AnimatedSprite2D
 @onready var nav_agent: NavigationAgent2D = $NavigationAgent2D
-
 
 func _ready() -> void:
 	# configure safely radius or updates if needed
@@ -25,7 +28,7 @@ func set_selected(selected: bool) -> void:
 		sprite.modulate = Color(1.0, 1.0, 1.0)
 
 func _physics_process(delta: float) -> void:
-	# if we have reached the destination, stop moving
+	# if target position has been set yet by a move command, dont try to navigate
 	if nav_agent.is_navigation_finished():
 		velocity = Vector2.ZERO
 		return

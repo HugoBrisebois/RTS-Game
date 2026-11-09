@@ -1,0 +1,18 @@
+[gd_scene format=3 uid="uid://cwwiw8ajqde52"]
+
+[ext_resource type="Script" uid="uid://fohs43qxyea6" path="res://scripts/unit.gd" id="1_x387e"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_4npm0"]
+size = Vector2(66, 75)
+
+[node name="Unit" type="CharacterBody2D" unique_id=2047106111 groups=["Unit"]]
+script = ExtResource("1_x387e")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=1595890443]
+position = Vector2(-5, 1.5)
+shape = SubResource("RectangleShape2D_4npm0")
+
+[node name="NavigationAgent2D" type="NavigationAgent2D" parent="." unique_id=1221628144]
+avoidance_enabled = true
+debug_enabled = true
+debug_path_custom_color = Color(0.8320688, 0.11858676, 0.3278589, 1)

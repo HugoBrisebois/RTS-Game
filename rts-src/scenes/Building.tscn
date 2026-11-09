@@ -1,13 +1,15 @@
 [gd_scene format=3 uid="uid://7uplf2vtk6yl"]
 
-[ext_resource type="Script" uid="uid://c5svxnhdbhap" path="res://scripts/castle.gd" id="1_bly62"]
+[ext_resource type="Script" uid="uid://c5svxnhdbhap" path="res://scripts/building.gd" id="1_bly62"]
 [ext_resource type="Texture2D" uid="uid://dlufsdcrbt670" path="res://Assets/Buildings/Black Buildings/Castle.png" id="2_0ysgy"]
+[ext_resource type="PackedScene" uid="uid://c8f56gxnarpri" path="res://scenes/worker_unit.tscn" id="2_ogyss"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_qqcy4"]
 size = Vector2(311, 208)
 
 [node name="Building" type="StaticBody2D" unique_id=220378880]
 script = ExtResource("1_bly62")
+worker_scene = ExtResource("2_ogyss")
 
 [node name="Sprite2D" type="Sprite2D" parent="." unique_id=1587386872]
 texture = ExtResource("2_0ysgy")
