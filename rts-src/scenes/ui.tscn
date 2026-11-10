@@ -1,14 +1,45 @@
 [gd_scene format=3 uid="uid://bs0b0uh2glrao"]
 
-[ext_resource type="Script" uid="uid://dea0rkrf0hdin" path="res://scripts/camera.gd" id="1_nt7q6"]
+[ext_resource type="Script" uid="uid://cthrb0ffv0sta" path="res://scenes/ui.gd" id="1_nt7q6"]
 
 [node name="UI" type="CanvasLayer" unique_id=2071038511]
-
-[node name="Camera2D" type="Camera2D" parent="." unique_id=1507124307]
-position = Vector2(288, 162)
-limit_left = -1345
-limit_top = -385
-limit_right = 12544
-limit_bottom = 5490
-position_smoothing_enabled = true
 script = ExtResource("1_nt7q6")
+
+[node name="ResourceManager" type="Control" parent="." unique_id=35335114]
+layout_mode = 3
+anchors_preset = 0
+offset_right = 380.0
+offset_bottom = 69.0
+
+[node name="HBoxContainer" type="HBoxContainer" parent="ResourceManager" unique_id=381191512]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Gold" type="Label" parent="ResourceManager/HBoxContainer" unique_id=1031859191]
+layout_mode = 2
+
+[node name="Wood" type="Label" parent="ResourceManager/HBoxContainer" unique_id=817723899]
+layout_mode = 2
+
+[node name="control_panel" type="Control" parent="." unique_id=1872140238]
+layout_mode = 3
+anchors_preset = 0
+offset_right = 40.0
+offset_bottom = 40.0
+
+[node name="BuildMenu" type="VBoxContainer" parent="control_panel" unique_id=134035189]
+layout_mode = 1
+anchors_preset = -1
+offset_left = 12.0
+offset_top = 546.0
+offset_right = 1153.0
+offset_bottom = 640.0
+
+[node name="unitMenu" type="VBoxContainer" parent="control_panel" unique_id=1719244747]
+layout_mode = 0
+offset_right = 40.0
+offset_bottom = 40.0
