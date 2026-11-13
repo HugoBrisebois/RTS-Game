@@ -1,8 +1,8 @@
 extends Node2D
 
 @onready var camera: RTSCamera = $Camera2D
-@onready var units_container: Node2D = $UnitsContainer
-@onready var buildings_container: Node2D = $BuildingsContainer
+@onready var units_container: Node = $Unit_container
+@onready var buildings_container: Node = $building_container
 @onready var HUD: CanvasLayer = $UI
 
 # expose variables so that in the inspector so i can drag and drop the building placeholder scene and same for the placeholder unit scene
@@ -138,6 +138,9 @@ func _check_building_click() -> void:
 	var results = space_state.intersect_point(query)
 	var clicked_building = null
 	
+	if camera.is_drag_selecting:
+		return
+	
 	for result in results:
 		var collider = result.collider
 		if collider is Building:
@@ -159,4 +162,3 @@ func _check_building_click() -> void:
 		if selected_building:
 			print("Deselected building.")
 			selected_building = null
-			# HUD.hide_building_menu()

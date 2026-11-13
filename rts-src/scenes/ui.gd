@@ -38,13 +38,3 @@ func show_unit_hud(unit: Unit) -> void:
 	unit_menu.visible = true
 	building_menu.visible = false
 	# TODO: add button signals for actions
-	
-func hide_building_menu():
-	building_menu.visible = false
-
-func hide_unit_menu():
-	unit_menu.visible = false
-
-# Called every frame. 'delta' is the elapsed time since the previous frame.
-func _process(delta: float) -> void:
-	pass

@@ -7,7 +7,6 @@
 [ext_resource type="Texture2D" uid="uid://bhxh3vdwf763" path="res://Assets/Terrain/Tileset/Water Background color.png" id="4_pwc12"]
 [ext_resource type="Texture2D" uid="uid://45sl0dfmc160" path="res://Assets/Terrain/Tileset/Water Foam.png" id="5_iwt62"]
 [ext_resource type="Script" uid="uid://dea0rkrf0hdin" path="res://scripts/camera.gd" id="6_iwt62"]
-[ext_resource type="PackedScene" uid="uid://7uplf2vtk6yl" path="res://scenes/Building.tscn" id="6_pwc12"]
 [ext_resource type="PackedScene" uid="uid://bs0b0uh2glrao" path="res://scenes/ui.tscn" id="8_5a2pu"]
 [ext_resource type="PackedScene" uid="uid://b5yivtw3jx2x" path="res://scenes/resource_node.tscn" id="8_cvjg6"]
 
@@ -306,9 +305,6 @@ script = ExtResource("6_iwt62")
 [node name="UI" parent="." unique_id=2071038511 instance=ExtResource("8_5a2pu")]
 
 [node name="building_container" type="Node" parent="." unique_id=1794006297]
-
-[node name="Building" parent="building_container" unique_id=220378880 instance=ExtResource("6_pwc12")]
-position = Vector2(572, 267)
 
 [node name="Unit_container" type="Node" parent="." unique_id=392427140]
 

@@ -17,7 +17,6 @@ config/icon="res://icon.svg"
 
 [autoload]
 
-ChiptuneCore="*uid://bq3eraasn3emr"
 ResourceManager="*uid://b6m2untfsd167"
 
 [display]
@@ -27,7 +26,7 @@ window/stretch/aspect="expand"
 
 [editor_plugins]
 
-enabled=PackedStringArray("res://addons/Reproductor8Bits/plugin.cfg", "res://addons/godot_super-wakatime/plugin.cfg", "res://addons/yard/plugin.cfg")
+enabled=PackedStringArray("res://addons/godot_super-wakatime/plugin.cfg", "res://addons/yard/plugin.cfg")
 
 [global_group]
 
