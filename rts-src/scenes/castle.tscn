@@ -6,7 +6,7 @@
 
 [node name="Castle" unique_id=220378880 instance=ExtResource("1_0ysgy")]
 script = ExtResource("2_njhjj")
-worker_scene = null
+trained_unit_scene = null
 
 [node name="Sprite2D" type="Sprite2D" parent="." index="1" unique_id=1801249996]
 texture = ExtResource("2_rjj26")

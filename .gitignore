@@ -21,5 +21,8 @@ mono_crash.*.json
 
 # Export outputs
 *.exe
+*.x86_64
+*.sh
+*.pck
 # Uncomment if your project does not version PCK files as runtime dependencies.
 # *.pck
