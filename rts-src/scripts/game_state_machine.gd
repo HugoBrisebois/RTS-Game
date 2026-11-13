@@ -1,20 +1,18 @@
 extends Node2D
 
 @onready var camera: RTSCamera = $Camera2D
+<<<<<<< HEAD
 @onready var units_container: Node = $Unit_container
 @onready var buildings_container: Node = $building_container
 @onready var HUD: CanvasLayer = $UI
+=======
+@onready var units_container: Node2D = $UnitsContainer
+@onready var buildings_container: Node2D = $BuildingsContainer
+>>>>>>> parent of f719ec9 (made the ui menu for the building display)
 
 # expose variables so that in the inspector so i can drag and drop the building placeholder scene and same for the placeholder unit scene
 @export var unit_scene: PackedScene
 @export var building_scene: PackedScene
-
-# put the selected building variable here so it is class wode actionable
-var selected_building: Building = null
-
-# define variables for when a building is selected and emit a signal
-signal train_unit()
-signal cancel_unit()
 
 func _ready() -> void:
 	if camera:
@@ -24,14 +22,9 @@ func _ready() -> void:
 		printerr("Error: RTSCamera node could not be found at $Camera2D!")
 
 func _unhandled_input(event: InputEvent) -> void:
-	
 	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_RIGHT and event.pressed:
 		_command_selected_units_to_move()
-	
-	# handle building slection
-	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and event.pressed:
-		_check_building_click()
-	
+
 	if event is InputEventKey and event.pressed:
 		if event.physical_keycode == KEY_E:
 			print("Key E pressed: Attempting to spawn unit...")
@@ -64,27 +57,22 @@ func _spawn_unit_at_mouse() -> void:
 
 func _spawn_building_at_mouse() -> void:
 	if not building_scene:
-		printerr("Error: building scene failed to load")
+		printerr("CRITICAL ERROR: building_scene is ot assigned in the inspector")
 		return
 	
 	var new_building = building_scene.instantiate()
 	if not new_building:
-		printerr("Error: failed to instantiate building scene")
+		printerr("ERROR: failed to instantiate building scene")
 		return
-		
-	# convert mouse screen position to world coordinates using camera tranform
+	
 	var xform = camera.get_canvas_transform().affine_inverse()
 	var spawn_pos = xform * camera.get_viewport().get_mouse_position()
 	
-	# add to container first so world transforms initialize properly
 	if buildings_container:
 		buildings_container.add_child(new_building)
 	else:
 		get_tree().current_scene.add_child(new_building)
-		
-	# apply dynamic mouse world position
-	new_building.global_position = spawn_pos
-	print("Success: Building spawned at mouse position: ", spawn_pos)
+
 
 func _on_camera_selection_completed(world_rect: Rect2) -> void:
 	for unit_node in get_tree().get_nodes_in_group("Unit"):
@@ -124,6 +112,7 @@ func _command_selected_units_to_move() -> void:
 		for unit_node in get_tree().get_nodes_in_group("Unit"):
 			if unit_node is Unit and unit_node.is_selected:
 				unit_node.move_to(click_world_pos)
+<<<<<<< HEAD
 
 func _check_building_click() -> void:
 	var xform = camera.get_canvas_transform().affine_inverse()
@@ -162,3 +151,5 @@ func _check_building_click() -> void:
 		if selected_building:
 			print("Deselected building.")
 			selected_building = null
+=======
+>>>>>>> parent of f719ec9 (made the ui menu for the building display)
