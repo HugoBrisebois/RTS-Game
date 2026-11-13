@@ -1,4 +1,5 @@
 extends CanvasLayer
+class_name UI
 
 # declare the locations for the resource and general ui elements
 @onready var gold_label: Label = $ResourceManager/HBoxContainer/Gold
@@ -31,18 +32,19 @@ func show_building_menu(building: Building) -> void:
 	building_menu.visible = true
 	unit_menu.visible = false
 	# TODO: map button signals here
+	
 
 func show_unit_hud(unit: Unit) -> void:
 	unit_menu.visible = true
 	building_menu.visible = false
 	# TODO: add button signals for actions
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
-=======
->>>>>>> parent of f719ec9 (made the ui menu for the building display)
+	
+func hide_building_menu():
+	building_menu.visible = false
+
+func hide_unit_menu():
+	unit_menu.visible = false
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(delta: float) -> void:
 	pass
->>>>>>> parent of f719ec9 (made the ui menu for the building display)

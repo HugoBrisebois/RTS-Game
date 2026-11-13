@@ -28,18 +28,48 @@ layout_mode = 2
 [node name="control_panel" type="Control" parent="." unique_id=1872140238]
 layout_mode = 3
 anchors_preset = 0
-offset_right = 40.0
-offset_bottom = 40.0
+offset_right = 1152.0
+offset_bottom = 646.0
 
 [node name="BuildMenu" type="VBoxContainer" parent="control_panel" unique_id=134035189]
 layout_mode = 1
 anchors_preset = -1
-offset_left = 12.0
-offset_top = 546.0
-offset_right = 1153.0
-offset_bottom = 640.0
+offset_left = 1038.0
+offset_top = 509.0
+offset_right = 1156.0
+offset_bottom = 645.0
+
+[node name="train Unit" type="Button" parent="control_panel/BuildMenu" unique_id=1326401499]
+layout_mode = 2
+text = "Train Unit"
+
+[node name="Cancel Unit" type="Button" parent="control_panel/BuildMenu" unique_id=154682557]
+layout_mode = 2
+text = "Cancel unit"
 
 [node name="unitMenu" type="VBoxContainer" parent="control_panel" unique_id=1719244747]
-layout_mode = 0
-offset_right = 40.0
-offset_bottom = 40.0
+layout_mode = 1
+anchors_preset = -1
+anchor_right = 1.0
+anchor_bottom = 1.0020001
+offset_left = 1042.0
+offset_top = 511.0
+offset_right = -1.0
+offset_bottom = -0.29205322
+
+[node name="Attack" type="Button" parent="control_panel/unitMenu" unique_id=295606756]
+layout_mode = 2
+text = "Attack"
+
+[node name="Stop" type="Button" parent="control_panel/unitMenu" unique_id=1978467201]
+layout_mode = 2
+text = "Stop"
+
+[node name="castle" type="Button" parent="control_panel/unitMenu" unique_id=1529700422]
+layout_mode = 2
+text = "Castle"
+
+[node name="barracks" type="Button" parent="control_panel/unitMenu" unique_id=841813710]
+layout_mode = 2
+text = "Barracks
+"
