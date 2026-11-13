@@ -78,3 +78,5 @@ text = "Castle"
 layout_mode = 2
 text = "Barracks
 "
+
+[connection signal="pressed" from="control_panel/BuildMenu/train Unit" to="." method="_on_train_unit_pressed"]

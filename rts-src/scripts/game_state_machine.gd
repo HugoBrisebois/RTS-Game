@@ -12,10 +12,6 @@ extends Node2D
 # put the selected building variable here so it is class wode actionable
 var selected_building: Building = null
 
-# define variables for when a building is selected and emit a signal
-signal train_unit()
-signal cancel_unit()
-
 func _ready() -> void:
 	if camera:
 		camera.selection_completed.connect(_on_camera_selection_completed)

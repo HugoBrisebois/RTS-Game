@@ -9,6 +9,9 @@ class_name UI
 @onready var building_menu: VBoxContainer = $control_panel/BuildMenu
 @onready var unit_menu: VBoxContainer = $control_panel/unitMenu
 
+signal train_unit()
+signal cancel()
+
 
 # Called when the node enters the scene tree for the first time.
 func _ready() -> void:
@@ -45,6 +48,7 @@ func hide_building_menu():
 func hide_unit_menu():
 	unit_menu.visible = false
 
-# Called every frame. 'delta' is the elapsed time since the previous frame.
-func _process(delta: float) -> void:
-	pass
+
+func _on_train_unit_pressed() -> void:
+	print("training unit")
+	emit_signal("train_unit")
