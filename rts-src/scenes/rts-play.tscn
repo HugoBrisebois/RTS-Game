@@ -305,12 +305,12 @@ script = ExtResource("6_iwt62")
 
 [node name="UI" parent="." unique_id=2071038511 instance=ExtResource("8_5a2pu")]
 
-[node name="building_container" type="Node" parent="." unique_id=1794006297]
+[node name="BuildingsContainer" type="Node2D" parent="." unique_id=1794006297]
 
-[node name="Building" parent="building_container" unique_id=220378880 instance=ExtResource("6_pwc12")]
+[node name="Building" parent="BuildingsContainer" unique_id=220378880 instance=ExtResource("6_pwc12")]
 position = Vector2(572, 267)
 
-[node name="Unit_container" type="Node" parent="." unique_id=392427140]
+[node name="UnitsContainer" type="Node2D" parent="." unique_id=392427140]
 
 [node name="ResourceNode" parent="." unique_id=109593327 instance=ExtResource("8_cvjg6")]
 
