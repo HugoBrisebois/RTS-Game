@@ -37,7 +37,10 @@ func show_unit_hud(unit: Unit) -> void:
 	building_menu.visible = false
 	# TODO: add button signals for actions
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
+=======
+>>>>>>> parent of f719ec9 (made the ui menu for the building display)
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(delta: float) -> void:

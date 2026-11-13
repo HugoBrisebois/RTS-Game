@@ -8,6 +8,9 @@ extends Node2D
 =======
 @onready var units_container: Node2D = $UnitsContainer
 @onready var buildings_container: Node2D = $BuildingsContainer
+<<<<<<< HEAD
+>>>>>>> parent of f719ec9 (made the ui menu for the building display)
+=======
 >>>>>>> parent of f719ec9 (made the ui menu for the building display)
 
 # expose variables so that in the inspector so i can drag and drop the building placeholder scene and same for the placeholder unit scene
@@ -113,6 +116,7 @@ func _command_selected_units_to_move() -> void:
 			if unit_node is Unit and unit_node.is_selected:
 				unit_node.move_to(click_world_pos)
 <<<<<<< HEAD
+<<<<<<< HEAD
 
 func _check_building_click() -> void:
 	var xform = camera.get_canvas_transform().affine_inverse()
@@ -151,5 +155,7 @@ func _check_building_click() -> void:
 		if selected_building:
 			print("Deselected building.")
 			selected_building = null
+=======
+>>>>>>> parent of f719ec9 (made the ui menu for the building display)
 =======
 >>>>>>> parent of f719ec9 (made the ui menu for the building display)
