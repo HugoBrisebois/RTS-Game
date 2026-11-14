@@ -3,6 +3,7 @@
 [ext_resource type="PackedScene" uid="uid://7uplf2vtk6yl" path="res://scenes/Building.tscn" id="1_base"]
 [ext_resource type="Texture2D" uid="uid://yij85smfa5v8" path="res://Assets/Buildings/Black Buildings/Barracks.png" id="2_barracks"]
 [ext_resource type="Script" uid="uid://caxpoq643mw66" path="res://scripts/barracks.gd" id="3_barracks_script"]
+[ext_resource type="PackedScene" uid="uid://cx5b8u61cba0h" path="res://scenes/warrior.tscn" id="4_warrior"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_jxdab"]
 size = Vector2(177, 171)
@@ -15,9 +16,10 @@ script = ExtResource("3_barracks_script")
 defense_range = 450.0
 defense_damage = 18
 defense_cooldown = 1.2
-trained_warrior_scene = null
-warrior_gold_cost = 50
-warrior_wood_cost = 25
+trained_warrior_scene = ExtResource("4_warrior")
+warrior_gold_cost = 100
+warrior_wood_cost = 50
+warrior_meat_cost = 20
 building_name = "Barracks"
 max_health = 350
 gold_cost = 25

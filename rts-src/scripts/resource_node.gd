@@ -3,8 +3,9 @@ extends StaticBody2D
 
 const GOLD_TEXTURE: Texture2D = preload("res://Assets/Terrain/Resources/Gold/Gold Resource/Gold_Resource.png")
 const WOOD_TEXTURE: Texture2D = preload("res://Assets/Terrain/Resources/Wood/Wood Resource/Wood Resource.png")
+const MEAT_TEXTURE: Texture2D = preload("res://Assets/Terrain/Resources/Meat/Meat Resource/Meat Resource.png")
 
-@export_enum("gold", "wood") var resource_type: String = "gold"
+@export_enum("gold", "wood", "meat") var resource_type: String = "gold"
 @export var remaining_amount: int = 500
 
 signal depleted(resource_node: ResourceNode)
@@ -23,7 +24,16 @@ func _ready() -> void:
 func refresh_visual() -> void:
 	if not is_instance_valid(_sprite):
 		return
-	_sprite.texture = GOLD_TEXTURE if resource_type == "gold" else WOOD_TEXTURE
+	match resource_type:
+		"gold":
+			_sprite.texture = GOLD_TEXTURE
+		"wood":
+			_sprite.texture = WOOD_TEXTURE
+		"meat":
+			_sprite.texture = MEAT_TEXTURE
+		_:
+			push_error("Unsupported resource type: " + resource_type)
+			return
 	_sprite.position.y = -24.0
 	_sprite.z_index = 1
 

@@ -39,8 +39,9 @@ func _find_target() -> Node2D:
 
 # make warrior units
 @export var trained_warrior_scene: PackedScene
-@export var warrior_gold_cost: int = 50
-@export var warrior_wood_cost: int = 25
+@export var warrior_gold_cost: int = 100
+@export var warrior_wood_cost: int = 50
+@export var warrior_meat_cost: int = 20
 
 signal train_warrior()
 signal cancel()

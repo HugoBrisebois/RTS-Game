@@ -18,8 +18,13 @@ func _ready() -> void:
 	max_health = 80.0
 	attack_damage = 8
 	super._ready()
+	_play_animation("idle")
 
 func _process(delta: float) -> void:
+	_process_gathering(delta)
+	_update_animation()
+
+func _process_gathering(delta: float) -> void:
 	if not is_instance_valid(_resource_target):
 		if carried_resources > 0 and is_instance_valid(_home_building):
 			_returning_to_base = true
@@ -77,3 +82,24 @@ func _stop_gathering() -> void:
 	_home_building = null
 	_returning_to_base = false
 	super.stop()
+
+func _update_animation() -> void:
+	if not sprite or not sprite.sprite_frames:
+		return
+
+	var animation_name: StringName = &"idle"
+	if has_move_order:
+		if carried_resources > 0:
+			animation_name = &"run_gold" if _resource_type == "gold" else &"run_wood"
+		else:
+			animation_name = &"run"
+	elif is_instance_valid(_resource_target) and not _returning_to_base:
+		animation_name = &"pickaxe" if _resource_type == "gold" else &"axe"
+
+	_play_animation(animation_name)
+
+func _play_animation(animation_name: StringName) -> void:
+	if not sprite or not sprite.sprite_frames:
+		return
+	if sprite.sprite_frames.has_animation(animation_name) and sprite.animation != animation_name:
+		sprite.play(animation_name)

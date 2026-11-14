@@ -4,10 +4,13 @@ class_name UI
 @onready var gold_label: Label = $ResourceManager/HBoxContainer/Gold
 @onready var wood_label: Label = $ResourceManager/HBoxContainer/Wood
 @onready var building_menu: VBoxContainer = $control_panel/BuildMenu
+@onready var barracks_menu: VBoxContainer = $control_panel/BarracksMenu
 @onready var unit_menu: VBoxContainer = $control_panel/unitMenu
 
 signal train_worker
+signal train_warrior_requested
 signal build_barracks_requested
+signal resource_placement_requested(resource_type: String)
 signal attack_mode_requested
 signal gather_mode_requested
 signal stop_requested
@@ -18,21 +21,28 @@ var _status_label: Label
 
 func _ready() -> void:
 	building_menu.visible = false
+	barracks_menu.visible = false
 	unit_menu.visible = false
 	var cancel_button := get_node_or_null("control_panel/BuildMenu/Cancel Unit") as Button
 	if cancel_button:
 		cancel_button.visible = false
 	var train_button := get_node_or_null("control_panel/BuildMenu/train Unit") as Button
 	if train_button:
-		train_button.text = "Train Worker"
+		train_button.text = "Train Worker (50g 25w 10 food)"
+		train_button.tooltip_text = "Costs 50 gold, 25 wood, and 10 food."
 	var gather_button := get_node_or_null("control_panel/unitMenu/castle") as Button
 	if gather_button:
 		gather_button.text = "Gather"
 	var barracks_button := get_node_or_null("control_panel/unitMenu/barracks") as Button
 	if barracks_button:
 		barracks_button.text = "Build Barracks"
+	var warrior_button := get_node_or_null("control_panel/BarracksMenu/TrainWarrior") as Button
+	if warrior_button:
+		warrior_button.text = "Train Warrior (100g 50w 20 food)"
+		warrior_button.tooltip_text = "Costs 100 gold, 50 wood, and 20 food."
 	ResourceManager.resources_changed.connect(_on_resources_changed)
 	_connect_button("control_panel/BuildMenu/train Unit", _on_train_worker_pressed)
+	_connect_button("control_panel/BarracksMenu/TrainWarrior", _on_train_warrior_pressed)
 	_connect_button("control_panel/unitMenu/Attack", _on_attack_pressed)
 	_connect_button("control_panel/unitMenu/Stop", _on_stop_pressed)
 	_connect_button("control_panel/unitMenu/castle", _on_gather_pressed)
@@ -62,13 +72,23 @@ func _add_hud_controls() -> void:
 	resource_row.add_child(meat_label)
 
 	_status_label = Label.new()
-	_status_label.position = Vector2(12.0, 76.0)
+	_status_label.position = Vector2(12.0, 122.0)
 	_status_label.add_theme_color_override("font_color", Color.WHITE)
 	_status_label.add_theme_color_override("font_shadow_color", Color.BLACK)
 	_status_label.add_theme_constant_override("shadow_offset_x", 2)
 	_status_label.add_theme_constant_override("shadow_offset_y", 2)
 	_status_label.visible = false
 	$control_panel.add_child(_status_label)
+
+	var resource_buttons := HBoxContainer.new()
+	resource_buttons.position = Vector2(12.0, 78.0)
+	resource_buttons.add_theme_constant_override("separation", 6)
+	$control_panel.add_child(resource_buttons)
+	for resource_type in ["gold", "wood", "meat"]:
+		var button := Button.new()
+		button.text = "Place " + ("Food" if resource_type == "meat" else resource_type.capitalize())
+		button.pressed.connect(func() -> void: resource_placement_requested.emit(resource_type))
+		resource_buttons.add_child(button)
 
 	var help_label := Label.new()
 	help_label.text = "Select: left-click / drag   Move, gather, attack: right-click   Camera: WASD / edge / middle-drag   Zoom: wheel"
@@ -97,24 +117,27 @@ func _update_display() -> void:
 	wood_label.text = "Wood: " + str(ResourceManager.resources.get("wood", 0))
 	var meat_label := get_node_or_null("ResourceManager/HBoxContainer/Meat") as Label
 	if meat_label:
-		meat_label.text = "Meat: " + str(ResourceManager.resources.get("meat", 0))
+		meat_label.text = "Food: " + str(ResourceManager.resources.get("meat", 0))
 
 func _on_resources_changed(_resource_name: String, _new_amount: int) -> void:
 	_update_display()
 
 func show_building_menu(building: Building) -> void:
 	building_menu.visible = building is Castle and not building.is_enemy
+	barracks_menu.visible = building is Barracks and not building.is_enemy
 	unit_menu.visible = false
 
 func show_unit_hud(unit: Unit) -> void:
 	unit_menu.visible = not unit.is_enemy
 	building_menu.visible = false
+	barracks_menu.visible = false
 	var build_button := get_node_or_null("control_panel/unitMenu/barracks") as Button
 	if build_button:
 		build_button.visible = not unit.is_enemy
 
 func hide_building_menu() -> void:
 	building_menu.visible = false
+	barracks_menu.visible = false
 
 func hide_unit_menu() -> void:
 	unit_menu.visible = false
@@ -130,11 +153,15 @@ func show_message(message: String, duration: float = 3.0) -> void:
 func show_match_result(message: String) -> void:
 	show_message(message, 0.0)
 	building_menu.visible = false
+	barracks_menu.visible = false
 	unit_menu.visible = false
 	$control_panel.get_node("Restart").grab_focus()
 
 func _on_train_worker_pressed() -> void:
 	train_worker.emit()
+
+func _on_train_warrior_pressed() -> void:
+	train_warrior_requested.emit()
 
 func _on_build_barracks_pressed() -> void:
 	build_barracks_requested.emit()

@@ -5,6 +5,9 @@ const ENEMY_CASTLE_POSITION := Vector2(11400.0, 4000.0)
 const WORLD_BOUNDS := Rect2(-1200.0, -1300.0, 13700.0, 6700.0)
 const BARRACKS_GOLD_COST := 25
 const BARRACKS_WOOD_COST := 80
+const UNIT_FORMATION_SPACING := 88.0
+const RESOURCE_SPAWN_MIN_SPACING := 350.0
+const RESOURCE_SPAWN_SEED := 20261114
 
 @onready var camera: RTSCamera = $Camera2D
 @onready var units_container: Node2D = $UnitsContainer
@@ -16,21 +19,35 @@ const BARRACKS_WOOD_COST := 80
 @export var building_scene: PackedScene
 @export var barracks_scene: PackedScene
 @export var resource_node_scene: PackedScene
+@export_range(0, 200) var additional_resource_deposits: int = 64
 
 var selected_building: Building
 var selected_units: Array[Unit] = []
 var player_castle: Castle
 var _placement_preview: Building
+var _resource_placement_preview: ResourceNode
 var _placement_mode: bool = false
+var _resource_placement_mode: bool = false
 var _attack_mode: bool = false
 var _gather_mode: bool = false
 var _match_over: bool = false
 var _worker_spawn_index: int = 0
+var _warrior_spawn_index: int = 0
+
+@export var enemy_warrior_scene: PackedScene
+@export_range (10.0, 300.0, 1.0) var enemy_wave_interval: float = 45.0
+@export_range(1, 10) var enemy_wave_size: int = 2
+@export_range(1, 20) var enemy_unit_cap: int = 8
+
+var _enemy_wave_timer: float = 45.0
+
 
 func _ready() -> void:
 	ResourceManager.reset()
 	HUD.train_worker.connect(_on_train_worker_requested)
+	HUD.train_warrior_requested.connect(_on_train_warrior_requested)
 	HUD.build_barracks_requested.connect(_start_barracks_placement)
+	HUD.resource_placement_requested.connect(_start_resource_placement)
 	HUD.attack_mode_requested.connect(_start_attack_mode)
 	HUD.gather_mode_requested.connect(_start_gather_mode)
 	HUD.stop_requested.connect(_stop_selected_units)
@@ -46,24 +63,33 @@ func _process(_delta: float) -> void:
 		_placement_preview.global_position = position
 		var valid := _is_build_site_valid(position)
 		_placement_preview.modulate = Color(0.45, 1.0, 0.45, 0.6) if valid else Color(1.0, 0.35, 0.35, 0.6)
+	elif _resource_placement_mode and is_instance_valid(_resource_placement_preview):
+		var position := _mouse_world_position()
+		_resource_placement_preview.global_position = position
+		var valid := _is_resource_site_valid(position)
+		_resource_placement_preview.modulate = Color(0.45, 1.0, 0.45, 0.6) if valid else Color(1.0, 0.35, 0.35, 0.6)
 
 func _unhandled_input(event: InputEvent) -> void:
 	if _match_over:
 		return
 	if event is InputEventMouseButton and event.pressed:
 		if event.button_index == MOUSE_BUTTON_RIGHT:
-			if _placement_mode:
-				_cancel_barracks_placement()
+			if _placement_mode or _resource_placement_mode:
+				_cancel_placement()
+				HUD.show_message("Placement canceled.")
 			else:
 				_command_selected_units()
 		elif event.button_index == MOUSE_BUTTON_LEFT:
 			if _placement_mode:
 				_place_barracks()
+			elif _resource_placement_mode:
+				_place_resource()
 			else:
 				_select_object_at_mouse()
 	elif event is InputEventKey and event.pressed and event.keycode == KEY_ESCAPE:
-		if _placement_mode:
-			_cancel_barracks_placement()
+		if _placement_mode or _resource_placement_mode:
+			_cancel_placement()
+			HUD.show_message("Placement canceled.")
 		elif _attack_mode or _gather_mode:
 			_attack_mode = false
 			_gather_mode = false
@@ -96,7 +122,75 @@ func _start_match() -> void:
 	_spawn_resource("gold", Vector2(200.0, 540.0), 600)
 	_spawn_resource("wood", Vector2(680.0, 450.0), 800)
 	_spawn_resource("wood", Vector2(1000.0, 260.0), 800)
+	_spawn_resource("meat", Vector2(860.0, 600.0), 600)
+	_spawn_additional_resources.call_deferred()
 	HUD.show_message("Gather resources, train workers, build a barracks, and destroy the enemy castle.", 8.0)
+
+func _spawn_additional_resources() -> void:
+	if additional_resource_deposits <= 0:
+		return
+	if not resource_node_scene:
+		printerr("Cannot distribute resources because the resource node scene is not assigned.")
+		return
+
+	var navigation_region := $NavigationRegion2D as NavigationRegion2D
+	if not navigation_region or not navigation_region.navigation_polygon:
+		printerr("Cannot distribute resources because the navigation polygon is not configured.")
+		return
+
+	var rng := RandomNumberGenerator.new()
+	rng.seed = RESOURCE_SPAWN_SEED
+	var placed_positions: Array[Vector2] = [
+		Vector2(200.0, 540.0),
+		Vector2(680.0, 450.0),
+		Vector2(1000.0, 260.0),
+		Vector2(860.0, 600.0),
+	]
+	var bounds := WORLD_BOUNDS.grow(-100.0)
+	var attempts := 0
+	var max_attempts := additional_resource_deposits * 200
+	var spawned_count := 0
+	while spawned_count < additional_resource_deposits and attempts < max_attempts:
+		attempts += 1
+		var candidate := Vector2(
+			rng.randf_range(bounds.position.x, bounds.end.x),
+			rng.randf_range(bounds.position.y, bounds.end.y)
+		)
+		if not _is_distributed_resource_site_valid(candidate, navigation_region, placed_positions):
+			continue
+
+		var resource_index := spawned_count
+		var resource_type: String = ["gold", "wood", "meat"][resource_index % 3]
+		var resource_amount := 1600 if resource_type == "wood" else 1200
+		_spawn_resource(resource_type, candidate, resource_amount)
+		placed_positions.append(candidate)
+		spawned_count += 1
+
+	if spawned_count < additional_resource_deposits:
+		push_warning("Placed %d of %d requested map-wide resource deposits; the map may not have enough spaced walkable ground." % [spawned_count, additional_resource_deposits])
+
+func _is_distributed_resource_site_valid(position: Vector2, navigation_region: NavigationRegion2D, placed_positions: Array[Vector2]) -> bool:
+	var navigation_polygon := navigation_region.navigation_polygon
+	var vertices := navigation_polygon.get_vertices()
+	var local_position := navigation_region.to_local(position)
+	var is_walkable := false
+	for polygon_index in range(navigation_polygon.get_polygon_count()):
+		var polygon_points := PackedVector2Array()
+		for vertex_index in navigation_polygon.get_polygon(polygon_index):
+			polygon_points.append(vertices[vertex_index])
+		if Geometry2D.is_point_in_polygon(local_position, polygon_points):
+			is_walkable = true
+			break
+	if not is_walkable:
+		return false
+	if position.distance_to(PLAYER_CASTLE_POSITION) < RESOURCE_SPAWN_MIN_SPACING:
+		return false
+	if position.distance_to(ENEMY_CASTLE_POSITION) < RESOURCE_SPAWN_MIN_SPACING:
+		return false
+	for placed_position in placed_positions:
+		if position.distance_to(placed_position) < RESOURCE_SPAWN_MIN_SPACING:
+			return false
+	return true
 
 func _spawn_building(scene: PackedScene, position: Vector2, enemy: bool) -> Building:
 	if not scene:
@@ -141,7 +235,8 @@ func _spawn_resource(resource_type: String, position: Vector2, amount: int) -> v
 	resource.depleted.connect(_on_resource_depleted)
 
 func _on_resource_depleted(resource: ResourceNode) -> void:
-	HUD.show_message(resource.resource_type.capitalize() + " node depleted.")
+	var display_name := "Food" if resource.resource_type == "meat" else resource.resource_type.capitalize()
+	HUD.show_message(display_name + " node depleted.")
 
 func _select_object_at_mouse() -> void:
 	var object := _get_object_at(_mouse_world_position())
@@ -168,7 +263,7 @@ func _select_object_at_mouse() -> void:
 		_clear_selection()
 
 func _on_camera_selection_completed(world_rect: Rect2) -> void:
-	if _match_over or _placement_mode:
+	if _match_over or _placement_mode or _resource_placement_mode:
 		return
 	_clear_selection()
 	for unit_node in get_tree().get_nodes_in_group("Unit"):
@@ -205,7 +300,8 @@ func _command_selected_units() -> void:
 		if workers_sent == 0:
 			HUD.show_message("Select a worker to gather resources.")
 		else:
-			HUD.show_message("Workers gathering " + (target as ResourceNode).resource_type + ".")
+			var display_name := "food" if (target as ResourceNode).resource_type == "meat" else (target as ResourceNode).resource_type
+			HUD.show_message("Workers gathering " + display_name + ".")
 		_gather_mode = false
 		_attack_mode = false
 		return
@@ -226,24 +322,62 @@ func _command_selected_units() -> void:
 		clampf(mouse_position.x, movement_bounds.position.x, movement_bounds.end.x),
 		clampf(mouse_position.y, movement_bounds.position.y, movement_bounds.end.y)
 	)
-	for unit in selected_units:
+	for index in range(selected_units.size()):
+		var unit := selected_units[index]
 		if unit is WorkerUnit:
 			(unit as WorkerUnit).cancel_gathering()
-		unit.move_to(destination)
+		unit.move_to(_get_formation_destination(index, selected_units.size(), destination, movement_bounds))
 	_attack_mode = false
 	_gather_mode = false
+
+func _get_formation_destination(index: int, unit_count: int, center: Vector2, bounds: Rect2) -> Vector2:
+	if unit_count <= 1:
+		return center
+
+	var columns := ceili(sqrt(float(unit_count)))
+	var rows := ceili(float(unit_count) / float(columns))
+	var row := floori(float(index) / float(columns))
+	var column := index % columns
+	var offset := Vector2(
+		(float(column) - float(columns - 1) * 0.5) * UNIT_FORMATION_SPACING,
+		(float(row) - float(rows - 1) * 0.5) * UNIT_FORMATION_SPACING
+	)
+	var destination := center + offset
+	return Vector2(
+		clampf(destination.x, bounds.position.x, bounds.end.x),
+		clampf(destination.y, bounds.position.y, bounds.end.y)
+	)
 
 func _get_object_at(world_position: Vector2) -> Node:
 	var query := PhysicsPointQueryParameters2D.new()
 	query.position = world_position
 	query.collide_with_areas = true
 	query.collide_with_bodies = true
-	for result in get_world_2d().direct_space_state.intersect_point(query, 32):
-		var candidate := result["collider"] as Node
-		while candidate:
-			if candidate is Unit or candidate is Building or candidate is ResourceNode:
-				return candidate
-			candidate = candidate.get_parent()
+	var results := get_world_2d().direct_space_state.intersect_point(query, 32)
+	for result in results:
+		var resource := _find_resource_node(result["collider"] as Node)
+		if resource:
+			return resource
+	for result in results:
+		var candidate := _find_interactable_object(result["collider"] as Node)
+		if candidate:
+			return candidate
+	return null
+
+func _find_resource_node(node: Node) -> ResourceNode:
+	var candidate := node
+	while candidate:
+		if candidate is ResourceNode:
+			return candidate
+		candidate = candidate.get_parent()
+	return null
+
+func _find_interactable_object(node: Node) -> Node:
+	var candidate := node
+	while candidate:
+		if candidate is Unit or candidate is Building or candidate is ResourceNode:
+			return candidate
+		candidate = candidate.get_parent()
 	return null
 
 func _is_enemy_object(object: Node) -> bool:
@@ -259,13 +393,13 @@ func _start_barracks_placement() -> void:
 	if selected_units.is_empty():
 		HUD.show_message("Select a worker or unit before building.")
 		return
-	if ResourceManager.resources["gold"] < BARRACKS_GOLD_COST or ResourceManager.resources["wood"] < BARRACKS_WOOD_COST:
+	if not ResourceManager.can_afford({"gold": BARRACKS_GOLD_COST, "wood": BARRACKS_WOOD_COST}):
 		HUD.show_message("A barracks costs %d gold and %d wood." % [BARRACKS_GOLD_COST, BARRACKS_WOOD_COST])
 		return
 	if not barracks_scene:
 		HUD.show_message("The barracks scene is not configured.")
 		return
-	_cancel_barracks_placement()
+	_cancel_placement()
 	_placement_preview = barracks_scene.instantiate() as Building
 	if not _placement_preview:
 		HUD.show_message("The configured barracks scene is invalid.")
@@ -286,24 +420,53 @@ func _cancel_barracks_placement() -> void:
 		_placement_preview.queue_free()
 	_placement_preview = null
 
+func _start_resource_placement(resource_type: String) -> void:
+	if _match_over:
+		return
+	if not ["gold", "wood", "meat"].has(resource_type):
+		HUD.show_message("That resource type cannot be placed.")
+		return
+	if not resource_node_scene:
+		HUD.show_message("The resource node scene is not configured.")
+		return
+	_cancel_placement()
+	_resource_placement_preview = resource_node_scene.instantiate() as ResourceNode
+	if not _resource_placement_preview:
+		HUD.show_message("The configured resource scene is invalid.")
+		return
+	_resource_placement_preview.resource_type = resource_type
+	_resource_placement_preview.remaining_amount = 500
+	resources_container.add_child(_resource_placement_preview)
+	_resource_placement_preview.set_process(false)
+	_resource_placement_preview.set_physics_process(false)
+	_set_collision_enabled(_resource_placement_preview, false)
+	_resource_placement_mode = true
+	var display_name := "food" if resource_type == "meat" else resource_type
+	HUD.show_message("Place " + display_name + " deposits with left-click. Right-click or Esc to finish.", 0.0)
+
+func _cancel_resource_placement() -> void:
+	_resource_placement_mode = false
+	if is_instance_valid(_resource_placement_preview):
+		_resource_placement_preview.queue_free()
+	_resource_placement_preview = null
+
+func _cancel_placement() -> void:
+	_cancel_barracks_placement()
+	_cancel_resource_placement()
+
 func _place_barracks() -> void:
 	var position := _mouse_world_position()
 	if not _is_build_site_valid(position):
 		HUD.show_message("That location is blocked or outside the playable map.")
 		return
-	if not ResourceManager.deduct_resource("gold", BARRACKS_GOLD_COST):
-		HUD.show_message("Not enough gold to build a barracks.")
-		return
-	if not ResourceManager.deduct_resource("wood", BARRACKS_WOOD_COST):
-		ResourceManager.add_resource("gold", BARRACKS_GOLD_COST)
-		HUD.show_message("Not enough wood to build a barracks.")
-		return
 	var barracks := barracks_scene.instantiate() as Building
 	if not barracks:
-		ResourceManager.add_resource("gold", BARRACKS_GOLD_COST)
-		ResourceManager.add_resource("wood", BARRACKS_WOOD_COST)
 		HUD.show_message("Could not create the barracks.")
 		_cancel_barracks_placement()
+		return
+	if not ResourceManager.try_spend({"gold": BARRACKS_GOLD_COST, "wood": BARRACKS_WOOD_COST}):
+		HUD.show_message("Not enough gold or wood to build a barracks.")
+		barracks.queue_free()
 		return
 	barracks.is_enemy = false
 	buildings_container.add_child(barracks)
@@ -311,6 +474,16 @@ func _place_barracks() -> void:
 	barracks.destroyed.connect(_on_building_destroyed)
 	_cancel_barracks_placement()
 	HUD.show_message("Barracks built.")
+
+func _place_resource() -> void:
+	var position := _mouse_world_position()
+	if not _is_resource_site_valid(position):
+		HUD.show_message("Place the resource on clear, walkable ground.")
+		return
+	var resource_type := _resource_placement_preview.resource_type
+	_spawn_resource(resource_type, position, 500)
+	var display_name := "Food" if resource_type == "meat" else resource_type.capitalize()
+	HUD.show_message(display_name + " deposit placed. Keep clicking to place more.")
 
 func _is_build_site_valid(position: Vector2) -> bool:
 	if not WORLD_BOUNDS.has_point(position):
@@ -343,6 +516,23 @@ func _is_build_site_valid(position: Vector2) -> bool:
 	query.collide_with_bodies = true
 	return get_world_2d().direct_space_state.intersect_shape(query, 1).is_empty()
 
+func _is_resource_site_valid(position: Vector2) -> bool:
+	if not WORLD_BOUNDS.has_point(position) or not is_instance_valid(_resource_placement_preview):
+		return false
+	var nav_map := get_world_2d().navigation_map
+	if nav_map.is_valid() and NavigationServer2D.map_get_closest_point(nav_map, position).distance_to(position) > 24.0:
+		return false
+	var collision := _resource_placement_preview.get_node_or_null("CollisionShape2D") as CollisionShape2D
+	if not collision or not collision.shape:
+		return false
+	var query := PhysicsShapeQueryParameters2D.new()
+	query.shape = collision.shape
+	query.transform = Transform2D(0.0, position + collision.position)
+	query.exclude = [_resource_placement_preview.get_rid()]
+	query.collide_with_areas = false
+	query.collide_with_bodies = true
+	return get_world_2d().direct_space_state.intersect_shape(query, 1).is_empty()
+
 func _set_collision_enabled(node: Node, enabled: bool) -> void:
 	if node is CollisionShape2D or node is CollisionPolygon2D:
 		node.set_deferred("disabled", not enabled)
@@ -362,23 +552,45 @@ func _on_train_worker_requested() -> void:
 	if not castle.trained_unit_scene:
 		HUD.show_message("The castle has no worker scene assigned.")
 		return
-	if ResourceManager.resources["gold"] < castle.worker_gold_cost or ResourceManager.resources["wood"] < castle.worker_wood_cost:
-		HUD.show_message("A worker costs %d gold and %d wood." % [castle.worker_gold_cost, castle.worker_wood_cost])
+	var costs := {"gold": castle.worker_gold_cost, "wood": castle.worker_wood_cost, "meat": castle.worker_meat_cost}
+	if not ResourceManager.can_afford(costs):
+		HUD.show_message("A worker costs %d gold, %d wood, and %d food." % [castle.worker_gold_cost, castle.worker_wood_cost, castle.worker_meat_cost])
 		return
-	if not ResourceManager.deduct_resource("gold", castle.worker_gold_cost):
-		return
-	if not ResourceManager.deduct_resource("wood", castle.worker_wood_cost):
-		ResourceManager.add_resource("gold", castle.worker_gold_cost)
+	if not ResourceManager.try_spend(costs):
 		return
 	var spawn_offset := Vector2(220.0, -110.0 + float(_worker_spawn_index % 5) * 48.0)
 	_worker_spawn_index += 1
 	var worker := _spawn_unit(castle.trained_unit_scene, castle.global_position + spawn_offset, false)
 	if not worker:
-		ResourceManager.add_resource("gold", castle.worker_gold_cost)
-		ResourceManager.add_resource("wood", castle.worker_wood_cost)
+		ResourceManager.add_resources(costs)
 		HUD.show_message("Could not train a worker.")
 		return
 	HUD.show_message("Worker trained.")
+
+func _on_train_warrior_requested() -> void:
+	if _match_over:
+		return
+	var barracks := selected_building as Barracks
+	if not barracks or barracks.is_enemy:
+		HUD.show_message("Select your barracks to train a warrior.")
+		return
+	if not barracks.trained_warrior_scene:
+		HUD.show_message("The barracks has no warrior scene assigned.")
+		return
+	var costs := {"gold": barracks.warrior_gold_cost, "wood": barracks.warrior_wood_cost, "meat": barracks.warrior_meat_cost}
+	if not ResourceManager.can_afford(costs):
+		HUD.show_message("A warrior costs %d gold, %d wood, and %d food." % [barracks.warrior_gold_cost, barracks.warrior_wood_cost, barracks.warrior_meat_cost])
+		return
+	if not ResourceManager.try_spend(costs):
+		return
+	var spawn_offset := Vector2(220.0, -110.0 + float(_warrior_spawn_index % 5) * 48.0)
+	_warrior_spawn_index += 1
+	var warrior := _spawn_unit(barracks.trained_warrior_scene, barracks.global_position + spawn_offset, false)
+	if not warrior:
+		ResourceManager.add_resources(costs)
+		HUD.show_message("Could not train a warrior.")
+		return
+	HUD.show_message("Warrior trained.")
 
 func _start_attack_mode() -> void:
 	if selected_units.is_empty():
@@ -422,7 +634,7 @@ func _on_unit_died(unit: Unit, _was_enemy: bool) -> void:
 
 func _finish_match(message: String) -> void:
 	_match_over = true
-	_cancel_barracks_placement()
+	_cancel_placement()
 	HUD.show_match_result(message)
 
 func _restart_match() -> void:

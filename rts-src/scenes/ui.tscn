@@ -37,9 +37,9 @@ mouse_filter = 2
 [node name="BuildMenu" type="VBoxContainer" parent="control_panel" unique_id=134035189]
 layout_mode = 1
 anchors_preset = -1
-offset_left = 1038.0
+offset_left = 900.0
 offset_top = 509.0
-offset_right = 1156.0
+offset_right = 1144.0
 offset_bottom = 645.0
 mouse_filter = 2
 
@@ -50,6 +50,19 @@ text = "Train Unit"
 [node name="Cancel Unit" type="Button" parent="control_panel/BuildMenu" unique_id=154682557]
 layout_mode = 2
 text = "Cancel unit"
+
+[node name="BarracksMenu" type="VBoxContainer" parent="control_panel"]
+layout_mode = 1
+anchors_preset = -1
+offset_left = 900.0
+offset_top = 509.0
+offset_right = 1144.0
+offset_bottom = 645.0
+mouse_filter = 2
+
+[node name="TrainWarrior" type="Button" parent="control_panel/BarracksMenu"]
+layout_mode = 2
+text = "Train Warrior\n(100 gold, 50 wood)"
 
 [node name="unitMenu" type="VBoxContainer" parent="control_panel" unique_id=1719244747]
 layout_mode = 1

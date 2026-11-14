@@ -16,6 +16,7 @@ script = ExtResource("2_njhjj")
 trained_unit_scene = ExtResource("3_njhjj")
 worker_gold_cost = 50
 worker_wood_cost = 25
+worker_meat_cost = 10
 
 [node name="CollisionShape2D2" parent="." index="0" unique_id=295892693]
 position = Vector2(-6.5, 11)

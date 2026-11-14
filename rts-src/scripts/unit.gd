@@ -18,6 +18,7 @@ var has_move_order: bool = false
 var attack_target: Node2D
 var _attack_timer: float = 0.0
 var _enemy_scan_timer: float = 0.0
+var _next_attack_animation: StringName = &"attack"
 
 @onready var sprite: AnimatedSprite2D = get_node_or_null("AnimatedSprite2D")
 @onready var nav_agent: NavigationAgent2D = get_node_or_null("NavigationAgent2D")
@@ -31,6 +32,11 @@ func _ready() -> void:
 	if nav_agent:
 		nav_agent.path_desired_distance = 4.0
 		nav_agent.target_desired_distance = 8.0
+		if nav_agent.avoidance_enabled:
+			nav_agent.radius = 34.0
+			nav_agent.neighbor_distance = 120.0
+			nav_agent.max_neighbors = 12
+			nav_agent.velocity_computed.connect(_on_navigation_velocity_computed)
 
 func _physics_process(delta: float) -> void:
 	if is_enemy:
@@ -45,8 +51,8 @@ func _physics_process(delta: float) -> void:
 	elif has_move_order:
 		_move_toward(destination)
 	else:
-		velocity = Vector2.ZERO
-		move_and_slide()
+		_apply_movement_velocity(Vector2.ZERO)
+	_update_combat_animation()
 
 func set_selected(selected: bool) -> void:
 	is_selected = selected
@@ -94,18 +100,17 @@ func _process_attack(delta: float) -> void:
 		return
 
 	has_move_order = false
-	velocity = Vector2.ZERO
-	move_and_slide()
+	_apply_movement_velocity(Vector2.ZERO)
 	_attack_timer -= delta
 	if _attack_timer <= 0.0:
 		_attack_timer = attack_cooldown
+		_play_attack_animation()
 		attack_target.take_damage(attack_damage)
 
 func _move_toward(target_position: Vector2) -> void:
 	if global_position.distance_to(target_position) <= 8.0:
 		has_move_order = false
-		velocity = Vector2.ZERO
-		move_and_slide()
+		_apply_movement_velocity(Vector2.ZERO)
 		return
 
 	var next_position := target_position
@@ -116,8 +121,47 @@ func _move_toward(target_position: Vector2) -> void:
 	var direction := global_position.direction_to(next_position)
 	if direction.is_zero_approx():
 		direction = global_position.direction_to(target_position)
-	velocity = direction * move_speed
+	_apply_movement_velocity(direction * move_speed)
+
+func _apply_movement_velocity(desired_velocity: Vector2) -> void:
+	if nav_agent and nav_agent.avoidance_enabled:
+		nav_agent.velocity = desired_velocity
+		return
+	velocity = desired_velocity
 	move_and_slide()
+
+func _on_navigation_velocity_computed(safe_velocity: Vector2) -> void:
+	velocity = safe_velocity
+	move_and_slide()
+
+func _update_combat_animation() -> void:
+	if not sprite or not sprite.sprite_frames or not sprite.sprite_frames.has_animation(&"attack"):
+		return
+
+	if has_move_order or _is_approaching_attack_target():
+		_play_unit_animation(&"run")
+	elif is_instance_valid(attack_target):
+		if sprite.animation != &"attack" and sprite.animation != &"attack2" or not sprite.is_playing():
+			_play_unit_animation(&"guard")
+	elif sprite.animation != &"attack" and sprite.animation != &"attack2" or not sprite.is_playing():
+		_play_unit_animation(&"idle")
+
+func _is_approaching_attack_target() -> bool:
+	if not is_instance_valid(attack_target):
+		return false
+	var effective_range := attack_range + (130.0 if attack_target is Building else 0.0)
+	return global_position.distance_to(attack_target.global_position) > effective_range
+
+func _play_attack_animation() -> void:
+	if not sprite or not sprite.sprite_frames:
+		return
+	var animation_name := _next_attack_animation
+	_next_attack_animation = &"attack2" if animation_name == &"attack" else &"attack"
+	_play_unit_animation(animation_name)
+
+func _play_unit_animation(animation_name: StringName) -> void:
+	if sprite and sprite.sprite_frames.has_animation(animation_name) and sprite.animation != animation_name:
+		sprite.play(animation_name)
 
 func _find_nearest_opponent() -> Node2D:
 	var nearest: Node2D
