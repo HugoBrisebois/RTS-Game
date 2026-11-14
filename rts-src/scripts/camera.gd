@@ -7,6 +7,7 @@ signal selection_completed(world_rect: Rect2)
 @export var move_speed: float = 600.0
 @export var edge_margin: float = 20.0
 @export var enable_edge_scrolling: bool = true
+@export var world_bounds: Rect2 = Rect2(-1200.0, -1300.0, 13700.0, 6700.0)
 
 @export_category("Zoom Settings")
 @export var min_zoom: float = 0.5
@@ -33,6 +34,7 @@ func _ready() -> void:
 func _process(delta: float) -> void:
 	_handle_movement(delta)
 	_handle_zoom(delta)
+	_clamp_to_world_bounds()
 
 func _unhandled_input(event: InputEvent) -> void:
 	_handle_panning_input(event)
@@ -129,6 +131,7 @@ func _handle_panning_input(event: InputEvent) -> void:
 		var delta: Vector2 = (pan_start_position - event.position) / zoom.x
 		position += delta
 		pan_start_position = event.position
+		_clamp_to_world_bounds()
 
 func _handle_zoom_input(event: InputEvent) -> void:
 	if event is InputEventMouseButton and event.pressed:
@@ -139,3 +142,16 @@ func _handle_zoom_input(event: InputEvent) -> void:
 
 func _handle_zoom(delta: float) -> void:
 	zoom = zoom.lerp(target_zoom, zoom_smoothness * delta)
+
+func _clamp_to_world_bounds() -> void:
+	var half_view_size := get_viewport_rect().size / zoom / 2.0
+	var min_position := world_bounds.position + half_view_size
+	var max_position := world_bounds.end - half_view_size
+	if min_position.x > max_position.x:
+		position.x = world_bounds.get_center().x
+	else:
+		position.x = clampf(position.x, min_position.x, max_position.x)
+	if min_position.y > max_position.y:
+		position.y = world_bounds.get_center().y
+	else:
+		position.y = clampf(position.y, min_position.y, max_position.y)

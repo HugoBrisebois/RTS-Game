@@ -3,10 +3,27 @@
 [ext_resource type="PackedScene" uid="uid://7uplf2vtk6yl" path="res://scenes/Building.tscn" id="1_0ysgy"]
 [ext_resource type="Script" uid="uid://ctjpo783dmweo" path="res://scripts/castle.gd" id="2_njhjj"]
 [ext_resource type="Texture2D" uid="uid://dlufsdcrbt670" path="res://Assets/Buildings/Black Buildings/Castle.png" id="2_rjj26"]
+[ext_resource type="PackedScene" uid="uid://c8f56gxnarpri" path="res://scenes/worker_unit.tscn" id="3_njhjj"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_1x8e5"]
+size = Vector2(281, 184)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_4npm0"]
+size = Vector2(315, 207.75)
 
 [node name="Castle" unique_id=220378880 instance=ExtResource("1_0ysgy")]
 script = ExtResource("2_njhjj")
-trained_unit_scene = null
+trained_unit_scene = ExtResource("3_njhjj")
+worker_gold_cost = 50
+worker_wood_cost = 25
+
+[node name="CollisionShape2D2" parent="." index="0" unique_id=295892693]
+position = Vector2(-6.5, 11)
+shape = SubResource("RectangleShape2D_1x8e5")
 
 [node name="Sprite2D" type="Sprite2D" parent="." index="1" unique_id=1801249996]
 texture = ExtResource("2_rjj26")
+
+[node name="CollisionShape2D" parent="InteractionArea" parent_id_path=PackedInt32Array(869779884) index="0" unique_id=1127670049]
+position = Vector2(-0.5, 11.875)
+shape = SubResource("RectangleShape2D_4npm0")

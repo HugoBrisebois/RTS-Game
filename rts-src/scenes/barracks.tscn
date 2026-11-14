@@ -1,0 +1,35 @@
+[gd_scene format=3 uid="uid://b0l021dsw5qi5"]
+
+[ext_resource type="PackedScene" uid="uid://7uplf2vtk6yl" path="res://scenes/Building.tscn" id="1_base"]
+[ext_resource type="Texture2D" uid="uid://yij85smfa5v8" path="res://Assets/Buildings/Black Buildings/Barracks.png" id="2_barracks"]
+[ext_resource type="Script" uid="uid://caxpoq643mw66" path="res://scripts/barracks.gd" id="3_barracks_script"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_jxdab"]
+size = Vector2(177, 171)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_njhjj"]
+size = Vector2(188, 183)
+
+[node name="Barracks" unique_id=524858744 instance=ExtResource("1_base")]
+script = ExtResource("3_barracks_script")
+defense_range = 450.0
+defense_damage = 18
+defense_cooldown = 1.2
+trained_warrior_scene = null
+warrior_gold_cost = 50
+warrior_wood_cost = 25
+building_name = "Barracks"
+max_health = 350
+gold_cost = 25
+wood_cost = 80
+
+[node name="CollisionShape2D2" parent="." index="0" unique_id=295892693]
+position = Vector2(0.5, 16.5)
+shape = SubResource("RectangleShape2D_jxdab")
+
+[node name="Sprite2D" type="Sprite2D" parent="." index="1" unique_id=829617654]
+texture = ExtResource("2_barracks")
+
+[node name="CollisionShape2D" parent="InteractionArea" parent_id_path=PackedInt32Array(869779884) index="0" unique_id=1127670049]
+position = Vector2(0, 17.5)
+shape = SubResource("RectangleShape2D_njhjj")

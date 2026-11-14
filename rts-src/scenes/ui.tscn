@@ -1,6 +1,6 @@
 [gd_scene format=3 uid="uid://bs0b0uh2glrao"]
 
-[ext_resource type="Script" uid="uid://cthrb0ffv0sta" path="res://scenes/ui.gd" id="1_nt7q6"]
+[ext_resource type="Script" uid="uid://cthrb0ffv0sta" path="res://scripts/ui.gd" id="1_nt7q6"]
 
 [node name="UI" type="CanvasLayer" unique_id=2071038511]
 script = ExtResource("1_nt7q6")
@@ -79,4 +79,4 @@ layout_mode = 2
 text = "Barracks
 "
 
-[connection signal="pressed" from="control_panel/BuildMenu/train Unit" to="." method="_on_train_unit_pressed"]
+[connection signal="pressed" from="control_panel/BuildMenu/train Unit" to="." method="_on_train_worker_pressed"]

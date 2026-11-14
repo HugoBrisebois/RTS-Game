@@ -1,0 +1,78 @@
+[gd_scene format=3 uid="uid://cx5b8u61cba0h"]
+
+[ext_resource type="PackedScene" uid="uid://cwwiw8ajqde52" path="res://scenes/unit.tscn" id="1_bdwhi"]
+[ext_resource type="Texture2D" uid="uid://cvmcmbsfobuiq" path="res://Assets/Units/Black Units/Warrior/Warrior_Idle.png" id="2_fvbna"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_jq62g"]
+atlas = ExtResource("2_fvbna")
+region = Rect2(0, 0, 192, 192)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_kkak1"]
+atlas = ExtResource("2_fvbna")
+region = Rect2(192, 0, 192, 192)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_iq265"]
+atlas = ExtResource("2_fvbna")
+region = Rect2(384, 0, 192, 192)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_utaup"]
+atlas = ExtResource("2_fvbna")
+region = Rect2(576, 0, 192, 192)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_bwxyh"]
+atlas = ExtResource("2_fvbna")
+region = Rect2(768, 0, 192, 192)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_hqs1p"]
+atlas = ExtResource("2_fvbna")
+region = Rect2(960, 0, 192, 192)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_3stqy"]
+atlas = ExtResource("2_fvbna")
+region = Rect2(1152, 0, 192, 192)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_m0bhd"]
+atlas = ExtResource("2_fvbna")
+region = Rect2(1344, 0, 192, 192)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_4npm0"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_jq62g")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_kkak1")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_iq265")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_utaup")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_bwxyh")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_hqs1p")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_3stqy")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_m0bhd")
+}],
+"loop": 1,
+"name": &"idle",
+"speed": 10.0
+}]
+
+[node name="Unit" unique_id=2047106111 instance=ExtResource("1_bdwhi")]
+
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="." index="0" unique_id=1396943784]
+position = Vector2(-9.499998, 7.5)
+scale = Vector2(0.82812506, 0.92187506)
+sprite_frames = SubResource("SpriteFrames_4npm0")
+animation = &"idle"
+autoplay = "idle"
+frame_progress = 0.7150281

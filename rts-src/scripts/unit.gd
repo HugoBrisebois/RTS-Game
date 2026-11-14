@@ -1,47 +1,158 @@
 class_name Unit
 extends CharacterBody2D
 
-var is_selected: bool = false
-var target_pos = null
+signal died(unit: Unit, was_enemy: bool)
 
-# move speed variable
-@export var move_speed: float = 200.0 
+@export var move_speed: float = 200.0
 @export var unit_name: String = "Generic Unit"
 @export var max_health: float = 200.0
+@export var attack_damage: int = 20
+@export var attack_range: float = 64.0
+@export var attack_cooldown: float = 0.8
+@export var is_enemy: bool = false
 
-var current_health: int = 100
+var is_selected: bool = false
+var current_health: float
+var destination: Vector2 = Vector2.ZERO
+var has_move_order: bool = false
+var attack_target: Node2D
+var _attack_timer: float = 0.0
+var _enemy_scan_timer: float = 0.0
 
-# visual indicator sprite color change
-@onready var sprite: AnimatedSprite2D = $AnimatedSprite2D
-@onready var nav_agent: NavigationAgent2D = $NavigationAgent2D
+@onready var sprite: AnimatedSprite2D = get_node_or_null("AnimatedSprite2D")
+@onready var nav_agent: NavigationAgent2D = get_node_or_null("NavigationAgent2D")
+var _health_bar: ProgressBar
 
 func _ready() -> void:
-	# configure safely radius or updates if needed
-	nav_agent.path_desired_distance = 4.0
-	nav_agent.target_desired_distance = 4.0
+	add_to_group("Unit")
+	current_health = max_health
+	_create_health_bar()
+	_update_tint()
+	if nav_agent:
+		nav_agent.path_desired_distance = 4.0
+		nav_agent.target_desired_distance = 8.0
+
+func _physics_process(delta: float) -> void:
+	if is_enemy:
+		_enemy_scan_timer -= delta
+		if _enemy_scan_timer <= 0.0:
+			_enemy_scan_timer = 1.0
+			if not is_instance_valid(attack_target):
+				attack_target = _find_nearest_opponent()
+
+	if is_instance_valid(attack_target):
+		_process_attack(delta)
+	elif has_move_order:
+		_move_toward(destination)
+	else:
+		velocity = Vector2.ZERO
+		move_and_slide()
 
 func set_selected(selected: bool) -> void:
 	is_selected = selected
+	_update_tint()
+
+func move_to(target_position: Vector2) -> void:
+	if has_move_order and destination.is_equal_approx(target_position) and not is_instance_valid(attack_target):
+		return
+	attack_target = null
+	has_move_order = true
+	destination = target_position
+
+func attack(target: Node2D) -> void:
+	if not is_instance_valid(target) or not target.has_method("take_damage"):
+		return
+	attack_target = target
+	has_move_order = false
+
+func stop() -> void:
+	attack_target = null
+	has_move_order = false
+	velocity = Vector2.ZERO
+
+func take_damage(amount: int) -> void:
+	if amount <= 0 or current_health <= 0.0:
+		return
+	current_health = maxf(current_health - amount, 0.0)
+	if _health_bar:
+		_health_bar.value = current_health
+	if current_health <= 0.0:
+		died.emit(self, is_enemy)
+		queue_free()
+
+func _process_attack(delta: float) -> void:
+	if not is_instance_valid(attack_target) or not attack_target.has_method("take_damage"):
+		attack_target = null
+		return
+
+	var attack_position := attack_target.global_position
+	var effective_range := attack_range
+	if attack_target is Building:
+		effective_range += 130.0
+	if global_position.distance_to(attack_position) > effective_range:
+		_move_toward(attack_position)
+		return
+
+	has_move_order = false
+	velocity = Vector2.ZERO
+	move_and_slide()
+	_attack_timer -= delta
+	if _attack_timer <= 0.0:
+		_attack_timer = attack_cooldown
+		attack_target.take_damage(attack_damage)
+
+func _move_toward(target_position: Vector2) -> void:
+	if global_position.distance_to(target_position) <= 8.0:
+		has_move_order = false
+		velocity = Vector2.ZERO
+		move_and_slide()
+		return
+
+	var next_position := target_position
+	if nav_agent:
+		nav_agent.target_position = target_position
+		if not nav_agent.is_navigation_finished():
+			next_position = nav_agent.get_next_path_position()
+	var direction := global_position.direction_to(next_position)
+	if direction.is_zero_approx():
+		direction = global_position.direction_to(target_position)
+	velocity = direction * move_speed
+	move_and_slide()
+
+func _find_nearest_opponent() -> Node2D:
+	var nearest: Node2D
+	var nearest_distance := INF
+	for group_name in ["Unit", "Building"]:
+		for candidate in get_tree().get_nodes_in_group(group_name):
+			if candidate == self or not is_instance_valid(candidate):
+				continue
+			var candidate_is_enemy := false
+			if candidate is Unit or candidate is Building:
+				candidate_is_enemy = candidate.is_enemy
+			if candidate_is_enemy == is_enemy:
+				continue
+			var distance := global_position.distance_squared_to(candidate.global_position)
+			if distance < nearest_distance:
+				nearest = candidate
+				nearest_distance = distance
+	return nearest
+
+func _create_health_bar() -> void:
+	_health_bar = ProgressBar.new()
+	_health_bar.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_health_bar.show_percentage = false
+	_health_bar.max_value = max_health
+	_health_bar.value = current_health
+	_health_bar.position = Vector2(-24.0, -42.0)
+	_health_bar.size = Vector2(48.0, 6.0)
+	add_child(_health_bar)
+
+func _update_tint() -> void:
+	if not sprite:
+		return
 	if is_selected:
 		sprite.modulate = Color(0.2, 1.0, 0.2)
+	elif is_enemy:
+		sprite.modulate = Color(1.0, 0.45, 0.45)
 	else:
-		sprite.modulate = Color(1.0, 1.0, 1.0)
-
-func _physics_process(delta: float) -> void:
-	# if target position has been set yet by a move command, dont try to navigate
-	if nav_agent.is_navigation_finished():
-		velocity = Vector2.ZERO
-		return
-	
-	# get the next path point calculated by the navigation server
-	var current_agent_position: Vector2 = global_position
-	var next_path_position: Vector2 = nav_agent.get_next_path_position()
-	
-	# steer toward the next path point
-	var direction = current_agent_position.direction_to(next_path_position)
-	velocity = direction * move_speed
-	
-	move_and_slide()
-	
-func move_to(destination: Vector2) -> void:
-	nav_agent.target_position = destination
+		sprite.modulate = Color.WHITE
