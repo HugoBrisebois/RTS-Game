@@ -11,5 +11,14 @@ the player starts the match with two worker units  all three resources nearby an
 
 all you have to do is download the executable for your os, i provide x86_64 for linux although not sure how to run it and .exe for windows just go to the releases page in the repo to download the respective execuatable files.
 
+# screenshot of the game running
+<img src="images/Screenshot from 2026-11-15 20-18-50.png" width=500px>
+<img src="images/Screenshot from 2026-11-15 20-24-37.png" width=500px>
+<img src="images/Screenshot from 2026-11-15 20-24-47.png" width=500px>
+<img src="images/Screenshot from 2026-11-15 20-25-07.png" width=500px>
+<img src="images/Screenshot from 2026-11-15 20-25-20.png" width=500px>
+<img src="images/Screenshot from 2026-11-15 20-25-29.png" width=500px>
+
+
 ## disclaimer
 this will no longer recieve updates, i am tire of making this game and that is it for this journey into making games.
