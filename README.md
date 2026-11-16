@@ -5,46 +5,11 @@ pack by Pixel Frog.
 
 ## Current playable prototype
 
-The match starts with a player castle, two workers, resource nodes, an enemy
-castle, and an enemy barracks. The enemy earns resources over time and sends
-capped warrior raids from its barracks; the barracks also attacks nearby
-opponents. Gather resources, train workers, build defenses, and destroy the
-enemy castle to win. Losing the player castle ends the match in defeat.
+the player starts the match with two worker units  all three resources nearby and a castle where they can choose to train new worker units. the worker units can go collect and return the resources they gather as well as build a barracks useful for warfare against the minimal bot that starts the match with the barracks and the castle, although does not need to collect resources because it runs on an automatic timer where it get new resources. the bot also functions on a timer to start making warriors that are going to be sent to the player castle inorder to destroy the castle, the castle is the main node of everything and if the player loses the castle, they lose the game and vice versa for the enemy base. the player is able to make forces and collect resources to build an economy that is sustainable in order to try to conquer the enemy base and defeat the bot.
 
-## Controls
+## how to play
 
-- **Left-click** a unit or building to select it.
-- **Left-click and drag** to select multiple units.
-- **Right-click** open ground to move selected units.
-- **Right-click** a resource node with selected workers to gather and return
-  resources.
-- **Right-click** an enemy unit or building with selected units to attack.
-- Use the **Gather** and **Attack** buttons to show command prompts for the
-  selected units.
-- Select your castle and press **Train Worker** to train a worker (50 gold, 25
-  wood, 10 food).
-- Select a player barracks and press **Train Warrior** to train a warrior
-  (100 gold, 50 wood, 20 food).
-- Select a unit, choose **Build Barracks**, then left-click a clear walkable
-  location to place it (25 gold, 80 wood). Right-click or press **Esc** to
-  cancel placement. Barracks automatically attack nearby enemies.
-- Use **Place Gold**, **Place Wood**, or **Place Food** at the top-left to add
-  500-unit resource deposits anywhere on clear walkable ground. Left-click to
-  place more deposits; right-click or **Esc** ends placement. This map-making
-  tool does not spend resources.
-- **WASD** or screen-edge scrolling moves the camera; middle-mouse drag pans;
-  the mouse wheel zooms.
-- Use **Restart** or **Quit** in the top-right corner.
+all you have to do is download the executable for your os, i provide x86_64 for linux although not sure how to run it and .exe for windows just go to the releases page in the repo to download the respective execuatable files.
 
-Workers gather 5 resources per trip, up to 10 at a time, and automatically
-return to the castle to deposit gold, wood, or food. Deposits are finite and
-disappear when exhausted. The HUD shows all three resource totals. The match
-starts with 150 gold, 250 wood, and 100 food. In addition to the starter
-deposits near your castle, 64 more are distributed across walkable areas of the
-map, with closer spacing and larger reserves. Adjust **Additional Resource
-Deposits** on the main scene's game-state node to change that number.
-
-## Project
-
-Open `rts-src/project.godot` with Godot 4.7 or newer. The configured main scene
-is `rts-src/scenes/rts-play.tscn`.
+## disclaimer
+this will no longer recieve updates, i am tire of making this game and that is it for this journey into making games.

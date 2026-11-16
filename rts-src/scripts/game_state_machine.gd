@@ -50,7 +50,6 @@ var _enemy_income_timer := ENEMY_INCOME_INTERVAL
 @export_range(1, 20) var enemy_unit_cap: int = 8
 var _enemy_wave_timer: float = enemy_wave_interval
 var _enemy_resources: Dictionary = {"gold": 150, "wood": 250, "meat": 100}
-var _enemy_spawn_index: int = 0
 var _navigation_bake_in_progress: bool = false
 var _navigation_bake_pending: bool = false
 
@@ -722,25 +721,35 @@ func _spawn_enemy_wave() -> void:
 		if _enemy_resources[resource_name] < costs[resource_name]:
 			return
 
-	var spawn_position := enemy_barracks.global_position + Vector2(
-		220.0,
-		float(_enemy_spawn_index % 5) * 72.0
-	)
-	var warrior := _spawn_unit(enemy_warrior_scene, spawn_position, true)
-	if not warrior:
-		return
+	for wave_index in range(enemy_wave_size):
+		if enemy_count >= enemy_unit_cap:
+			break
+		var can_afford_wave_unit := true
+		for resource_name in costs:
+			if _enemy_resources[resource_name] < costs[resource_name]:
+				can_afford_wave_unit = false
+				break
+		if not can_afford_wave_unit:
+			break
 
-	for resource_name in costs:
-		_enemy_resources[resource_name] -= costs[resource_name]
-	_enemy_spawn_index += 1
-	
-	# Add to current squad tracking pool and handle cleanup on death
-	_active_enemy_squad.append(warrior)
-	warrior.died.connect(func(_u, _e): _active_enemy_squad.erase(warrior))
+		var spawn_position := enemy_barracks.global_position + Vector2(
+			220.0,
+			(float(wave_index) - float(enemy_wave_size - 1) * 0.5) * 88.0
+		)
+		var warrior := _spawn_unit(enemy_warrior_scene, spawn_position, true)
+		if not warrior:
+			break
 
-	# Dispatch squad once threshold size is reached
-	if _active_enemy_squad.size() >= enemy_squad_size:
-		_dispatch_enemy_squad()
+		for resource_name in costs:
+			_enemy_resources[resource_name] -= costs[resource_name]
+		enemy_count += 1
+		_active_enemy_squad.append(warrior)
+		warrior.died.connect(_on_enemy_unit_died)
+
+		if _active_enemy_squad.size() >= enemy_squad_size:
+			_dispatch_enemy_squad()
+
+	_dispatch_enemy_squad()
 
 func _dispatch_enemy_squad() -> void:
 	if _active_enemy_squad.is_empty():
@@ -750,38 +759,12 @@ func _dispatch_enemy_squad() -> void:
 	for unit in _active_enemy_squad:
 		if not is_instance_valid(unit):
 			continue
-		
-		var target := _find_best_enemy_target(unit)
-		if target:
-			unit.attack(target)
-		else:
-			unit.attack(player_castle)
+		unit.attack(player_castle)
 			
 	_active_enemy_squad.clear()
 
-func _find_best_enemy_target(enemy_unit: Unit) -> Node2D:
-	var nearest_target: Node2D = null
-	var min_distance := INF
-	
-	for group_name in ["Unit", "Building"]:
-		for candidate in get_tree().get_nodes_in_group(group_name):
-			if not is_instance_valid(candidate) or candidate == enemy_unit:
-				continue
-			
-			var is_candidate_enemy := false
-			if candidate is Unit:
-				is_candidate_enemy = (candidate as Unit).is_enemy
-			elif candidate is Building:
-				is_candidate_enemy = (candidate as Building).is_enemy
-			
-			if not is_candidate_enemy:
-				var dist := enemy_unit.global_position.distance_to(candidate.global_position)
-				if dist < min_distance:
-					min_distance = dist
-					nearest_target = candidate
-					
-	return nearest_target
-
+func _on_enemy_unit_died(unit: Unit, _was_enemy: bool) -> void:
+	_active_enemy_squad.erase(unit)
 
 func _rebake_navigation_map() -> void:
 	var nav_region := get_node_or_null("NavigationRegion2D") as NavigationRegion2D

@@ -19,6 +19,8 @@ var attack_target: Node2D
 var _attack_timer: float = 0.0
 var _enemy_scan_timer: float = 0.0
 var _next_attack_animation: StringName = &"attack"
+var _attack_approach_target: Node2D
+var _attack_approach_position: Vector2
 
 @onready var sprite: AnimatedSprite2D = get_node_or_null("AnimatedSprite2D")
 @onready var nav_agent: NavigationAgent2D = get_node_or_null("NavigationAgent2D")
@@ -26,6 +28,8 @@ var _health_bar: ProgressBar
 
 func _ready() -> void:
 	add_to_group("Unit")
+	collision_layer = 2
+	collision_mask = 1
 	current_health = max_health
 	_create_health_bar()
 	_update_tint()
@@ -44,8 +48,6 @@ func _physics_process(delta: float) -> void:
 		if _enemy_scan_timer <= 0.0:
 			_enemy_scan_timer = 1.0
 			if not is_instance_valid(attack_target):
-				attack_target = _find_nearest_opponent()
-			elif not has_move_order and global_position.distance_to(attack_target.global_position) > 600.0:
 				attack_target = _find_nearest_opponent()
 
 	if is_instance_valid(attack_target):
@@ -72,6 +74,7 @@ func attack(target: Node2D) -> void:
 		return
 	attack_target = target
 	has_move_order = false
+	_attack_approach_target = null
 
 func stop() -> void:
 	attack_target = null
@@ -98,7 +101,7 @@ func _process_attack(delta: float) -> void:
 	if attack_target is Building:
 		effective_range += 130.0
 	if global_position.distance_to(attack_position) > effective_range:
-		_move_toward(attack_position)
+		_move_toward(_get_attack_approach_position(attack_target, effective_range))
 		return
 
 	has_move_order = false
@@ -109,17 +112,41 @@ func _process_attack(delta: float) -> void:
 		_play_attack_animation()
 		attack_target.take_damage(attack_damage)
 
+func _get_attack_approach_position(target: Node2D, effective_range: float) -> Vector2:
+	if not target is Building:
+		return target.global_position
+	if target != _attack_approach_target:
+		_attack_approach_target = target
+		var direction := target.global_position.direction_to(global_position)
+		if direction.is_zero_approx():
+			direction = Vector2.LEFT
+		_attack_approach_position = target.global_position + direction * (effective_range - 48.0)
+		var nav_map := get_world_2d().navigation_map
+		if nav_map.is_valid():
+			_attack_approach_position = NavigationServer2D.map_get_closest_point(
+				nav_map,
+				_attack_approach_position
+			)
+	return _attack_approach_position
+
 func _move_toward(target_position: Vector2) -> void:
 	if global_position.distance_to(target_position) <= 8.0:
 		has_move_order = false
 		_apply_movement_velocity(Vector2.ZERO)
 		return
 
-	var next_position := target_position
 	if nav_agent:
-		nav_agent.target_position = target_position
-		if not nav_agent.is_navigation_finished():
-			next_position = nav_agent.get_next_path_position()
+		if not nav_agent.target_position.is_equal_approx(target_position):
+			nav_agent.target_position = target_position
+		if nav_agent.is_navigation_finished():
+			_apply_movement_velocity(Vector2.ZERO)
+			return
+		var next_position := nav_agent.get_next_path_position()
+		var direction := global_position.direction_to(next_position)
+		_apply_movement_velocity(direction * move_speed)
+		return
+
+	var next_position := target_position
 	var direction := global_position.direction_to(next_position)
 	if direction.is_zero_approx():
 		direction = global_position.direction_to(target_position)
