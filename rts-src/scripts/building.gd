@@ -1,6 +1,8 @@
 class_name Building
 extends StaticBody2D
 
+const NAVIGATION_CLEARANCE := 12.0
+
 @export var building_name: String = "Castle"
 @export var max_health: int = 500
 @export var is_enemy: bool = false
@@ -12,14 +14,43 @@ signal destroyed(building: Building, was_enemy: bool)
 
 @onready var sprite: Sprite2D= $Sprite2D
 @onready var interaction_area: Area2D = $InteractionArea
+@onready var navigation_obstacle: NavigationObstacle2D = $NavigationObstacle2D
 
 func _ready() -> void:
 	add_to_group("Building")
 	current_health = max_health
+	_configure_navigation_obstacle()
 	_create_health_bar()
 	if is_enemy and sprite:
 		sprite.modulate = Color(1.0, 0.45, 0.45)
 
+func _configure_navigation_obstacle() -> void:
+	# Fallback check for collision shape naming consistency
+	var collision_shape := get_node_or_null("CollisionShape2D2") as CollisionShape2D
+	if not collision_shape:
+		collision_shape = get_node_or_null("CollisionShape2D") as CollisionShape2D
+
+	if not collision_shape or not collision_shape.shape:
+		push_warning("Building navigation avoidance requires a collision shape.")
+		return
+
+	navigation_obstacle.position = collision_shape.position
+
+	if collision_shape.shape is RectangleShape2D:
+		var half_size: Vector2 = (collision_shape.shape as RectangleShape2D).size * 0.5
+		half_size += Vector2.ONE * NAVIGATION_CLEARANCE
+		navigation_obstacle.vertices = PackedVector2Array([
+			Vector2(-half_size.x, -half_size.y),
+			Vector2(half_size.x, -half_size.y),
+			Vector2(half_size.x, half_size.y),
+			Vector2(-half_size.x, half_size.y),
+		])
+	elif collision_shape.shape is CircleShape2D:
+		navigation_obstacle.radius = (collision_shape.shape as CircleShape2D).radius + NAVIGATION_CLEARANCE
+	else:
+		push_warning("Building navigation avoidance does not support this collision shape.")
+		
+		
 func take_damage(amount: int) -> void:
 	if amount <= 0 or current_health <= 0:
 		return

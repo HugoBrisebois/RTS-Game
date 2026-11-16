@@ -1,3 +1,4 @@
+class_name GameStateManager
 extends Node2D
 
 const PLAYER_CASTLE_POSITION := Vector2(420.0, 340.0)
@@ -8,6 +9,12 @@ const BARRACKS_WOOD_COST := 80
 const UNIT_FORMATION_SPACING := 88.0
 const RESOURCE_SPAWN_MIN_SPACING := 350.0
 const RESOURCE_SPAWN_SEED := 20261114
+const ENEMY_INCOME_INTERVAL := 10.0
+const ENEMY_INCOME := {
+	"gold": 50,
+	"wood": 25,
+	"meat": 10,
+}
 
 @onready var camera: RTSCamera = $Camera2D
 @onready var units_container: Node2D = $UnitsContainer
@@ -24,6 +31,8 @@ const RESOURCE_SPAWN_SEED := 20261114
 var selected_building: Building
 var selected_units: Array[Unit] = []
 var player_castle: Castle
+var enemy_castle: Building
+var enemy_barracks: Barracks
 var _placement_preview: Building
 var _resource_placement_preview: ResourceNode
 var _placement_mode: bool = false
@@ -33,17 +42,25 @@ var _gather_mode: bool = false
 var _match_over: bool = false
 var _worker_spawn_index: int = 0
 var _warrior_spawn_index: int = 0
+var _enemy_income_timer := ENEMY_INCOME_INTERVAL
 
 @export var enemy_warrior_scene: PackedScene
-@export_range (10.0, 300.0, 1.0) var enemy_wave_interval: float = 45.0
+@export_range(10.0, 300.0, 1.0) var enemy_wave_interval: float = 45.0
 @export_range(1, 10) var enemy_wave_size: int = 2
 @export_range(1, 20) var enemy_unit_cap: int = 8
+var _enemy_wave_timer: float = enemy_wave_interval
+var _enemy_resources: Dictionary = {"gold": 150, "wood": 250, "meat": 100}
+var _enemy_spawn_index: int = 0
+var _navigation_bake_in_progress: bool = false
+var _navigation_bake_pending: bool = false
 
-var _enemy_wave_timer: float = 45.0
-
+# --- OPPONENT SQUAD POOLING CONFIGURATION ---
+@export_range(1, 10) var enemy_squad_size: int = 4
+var _active_enemy_squad: Array[Unit] = []
 
 func _ready() -> void:
 	ResourceManager.reset()
+	_enemy_wave_timer = enemy_wave_interval
 	HUD.train_worker.connect(_on_train_worker_requested)
 	HUD.train_warrior_requested.connect(_on_train_warrior_requested)
 	HUD.build_barracks_requested.connect(_start_barracks_placement)
@@ -55,9 +72,12 @@ func _ready() -> void:
 	HUD.quit_requested.connect(_quit_match)
 	camera.selection_completed.connect(_on_camera_selection_completed)
 	camera.world_bounds = WORLD_BOUNDS
+	var navigation_region := get_node_or_null("NavigationRegion2D") as NavigationRegion2D
+	if navigation_region:
+		navigation_region.bake_finished.connect(_on_navigation_bake_finished)
 	_start_match()
 
-func _process(_delta: float) -> void:
+func _process(delta: float) -> void:
 	if _placement_mode and is_instance_valid(_placement_preview):
 		var position := _mouse_world_position()
 		_placement_preview.global_position = position
@@ -68,6 +88,20 @@ func _process(_delta: float) -> void:
 		_resource_placement_preview.global_position = position
 		var valid := _is_resource_site_valid(position)
 		_resource_placement_preview.modulate = Color(0.45, 1.0, 0.45, 0.6) if valid else Color(1.0, 0.35, 0.35, 0.6)
+
+	if _match_over:
+		return
+
+	_enemy_income_timer -= delta
+	if _enemy_income_timer <= 0.0:
+		for resource_name in ENEMY_INCOME:
+			_enemy_resources[resource_name] += ENEMY_INCOME[resource_name]
+		_enemy_income_timer = ENEMY_INCOME_INTERVAL
+
+	_enemy_wave_timer -= delta
+	if _enemy_wave_timer <= 0.0:
+		_spawn_enemy_wave()
+		_enemy_wave_timer = enemy_wave_interval
 
 func _unhandled_input(event: InputEvent) -> void:
 	if _match_over:
@@ -103,7 +137,7 @@ func _start_match() -> void:
 	player_castle = player_building
 	player_castle.building_name = "Castle"
 
-	var enemy_castle := _spawn_building(building_scene, ENEMY_CASTLE_POSITION, true)
+	enemy_castle = _spawn_building(building_scene, ENEMY_CASTLE_POSITION, true)
 	if not enemy_castle:
 		HUD.show_message("Could not create the enemy base.")
 		return
@@ -115,9 +149,17 @@ func _start_match() -> void:
 		enemy_health_bar.max_value = enemy_castle.max_health
 		enemy_health_bar.value = enemy_castle.current_health
 
+	enemy_barracks = _spawn_building(
+		barracks_scene,
+		ENEMY_CASTLE_POSITION + Vector2(-360.0, 200.0),
+		true
+	) as Barracks
+	if not enemy_barracks:
+		printerr("Could not create the enemy barracks.")
+		return
+
 	_spawn_unit(unit_scene, PLAYER_CASTLE_POSITION + Vector2(-220.0, 100.0), false)
 	_spawn_unit(unit_scene, PLAYER_CASTLE_POSITION + Vector2(-200.0, -150.0), false)
-	_spawn_unit(unit_scene, ENEMY_CASTLE_POSITION + Vector2(220.0, 180.0), true)
 
 	_spawn_resource("gold", Vector2(200.0, 540.0), 600)
 	_spawn_resource("wood", Vector2(680.0, 450.0), 800)
@@ -204,6 +246,10 @@ func _spawn_building(scene: PackedScene, position: Vector2, enemy: bool) -> Buil
 	buildings_container.add_child(building)
 	building.global_position = position
 	building.destroyed.connect(_on_building_destroyed)
+	
+	# make sure the building is present in the navigation region
+	_rebake_navigation_map()
+	
 	return building
 
 func _spawn_unit(scene: PackedScene, position: Vector2, enemy: bool) -> Unit:
@@ -472,6 +518,7 @@ func _place_barracks() -> void:
 	buildings_container.add_child(barracks)
 	barracks.global_position = position
 	barracks.destroyed.connect(_on_building_destroyed)
+	_rebake_navigation_map()
 	_cancel_barracks_placement()
 	HUD.show_message("Barracks built.")
 
@@ -622,7 +669,10 @@ func _on_building_destroyed(building: Building, was_enemy: bool) -> void:
 	if selected_building == building:
 		selected_building = null
 		HUD.hide_building_menu()
-	if was_enemy:
+		
+	building.tree_exited.connect(_rebake_navigation_map, CONNECT_ONE_SHOT)
+	
+	if was_enemy and building == enemy_castle:
 		_finish_match("Victory! The enemy castle has been destroyed.")
 	elif building == player_castle:
 		_finish_match("Defeat! Your castle has been destroyed.")
@@ -645,3 +695,107 @@ func _quit_match() -> void:
 
 func _mouse_world_position() -> Vector2:
 	return camera.get_canvas_transform().affine_inverse() * camera.get_viewport().get_mouse_position()
+
+# --- MODIFIED: TACTICAL SQUAD-POOLING ENEMY WAVE SPAWNER ---
+func _spawn_enemy_wave() -> void:
+	if not is_instance_valid(enemy_barracks) or not is_instance_valid(player_castle):
+		return
+	if not enemy_warrior_scene:
+		printerr("An enemy warrior scene is not assigned.")
+		return
+
+	var costs := {
+		"gold": enemy_barracks.warrior_gold_cost,
+		"wood": enemy_barracks.warrior_wood_cost,
+		"meat": enemy_barracks.warrior_meat_cost,
+	}
+	
+	var enemy_count := 0
+	for candidate in get_tree().get_nodes_in_group("Unit"):
+		if candidate is Unit and candidate.is_enemy:
+			enemy_count += 1
+
+	if enemy_count >= enemy_unit_cap:
+		return
+
+	for resource_name in costs:
+		if _enemy_resources[resource_name] < costs[resource_name]:
+			return
+
+	var spawn_position := enemy_barracks.global_position + Vector2(
+		220.0,
+		float(_enemy_spawn_index % 5) * 72.0
+	)
+	var warrior := _spawn_unit(enemy_warrior_scene, spawn_position, true)
+	if not warrior:
+		return
+
+	for resource_name in costs:
+		_enemy_resources[resource_name] -= costs[resource_name]
+	_enemy_spawn_index += 1
+	
+	# Add to current squad tracking pool and handle cleanup on death
+	_active_enemy_squad.append(warrior)
+	warrior.died.connect(func(_u, _e): _active_enemy_squad.erase(warrior))
+
+	# Dispatch squad once threshold size is reached
+	if _active_enemy_squad.size() >= enemy_squad_size:
+		_dispatch_enemy_squad()
+
+func _dispatch_enemy_squad() -> void:
+	if _active_enemy_squad.is_empty():
+		return
+	
+	print("Enemy bot dispatching tactical squad!")
+	for unit in _active_enemy_squad:
+		if not is_instance_valid(unit):
+			continue
+		
+		var target := _find_best_enemy_target(unit)
+		if target:
+			unit.attack(target)
+		else:
+			unit.attack(player_castle)
+			
+	_active_enemy_squad.clear()
+
+func _find_best_enemy_target(enemy_unit: Unit) -> Node2D:
+	var nearest_target: Node2D = null
+	var min_distance := INF
+	
+	for group_name in ["Unit", "Building"]:
+		for candidate in get_tree().get_nodes_in_group(group_name):
+			if not is_instance_valid(candidate) or candidate == enemy_unit:
+				continue
+			
+			var is_candidate_enemy := false
+			if candidate is Unit:
+				is_candidate_enemy = (candidate as Unit).is_enemy
+			elif candidate is Building:
+				is_candidate_enemy = (candidate as Building).is_enemy
+			
+			if not is_candidate_enemy:
+				var dist := enemy_unit.global_position.distance_to(candidate.global_position)
+				if dist < min_distance:
+					min_distance = dist
+					nearest_target = candidate
+					
+	return nearest_target
+
+
+func _rebake_navigation_map() -> void:
+	var nav_region := get_node_or_null("NavigationRegion2D") as NavigationRegion2D
+	if not nav_region or not nav_region.navigation_polygon:
+		return
+	if _navigation_bake_in_progress:
+		_navigation_bake_pending = true
+		return
+	_navigation_bake_in_progress = true
+	nav_region.bake_navigation_polygon()
+
+func _on_navigation_bake_finished() -> void:
+	_navigation_bake_in_progress = false
+	if not _navigation_bake_pending:
+		return
+	_navigation_bake_pending = false
+	_rebake_navigation_map()

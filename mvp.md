@@ -12,7 +12,9 @@ condition.
 - [x] Click-select and drag-select player units
 - [x] Move selected units with right-click
 - [x] Start a match with a player castle, two workers, resource nodes, an enemy
-  castle, and an enemy unit
+  castle, and an enemy barracks
+- [x] Give the enemy scripted income, defensive barracks, and capped warrior
+  raids
 - [x] Select a building and show its available menu
 - [x] Train workers from the selected castle with a resource cost
 - [x] Display gold, wood, and meat totals

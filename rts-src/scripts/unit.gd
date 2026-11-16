@@ -4,7 +4,7 @@ extends CharacterBody2D
 signal died(unit: Unit, was_enemy: bool)
 
 @export var move_speed: float = 200.0
-@export var unit_name: String = "Generic Unit"
+@export var unit_name: String = "Warrior Uniy"
 @export var max_health: float = 200.0
 @export var attack_damage: int = 20
 @export var attack_range: float = 64.0
@@ -33,9 +33,9 @@ func _ready() -> void:
 		nav_agent.path_desired_distance = 4.0
 		nav_agent.target_desired_distance = 8.0
 		if nav_agent.avoidance_enabled:
-			nav_agent.radius = 34.0
-			nav_agent.neighbor_distance = 120.0
-			nav_agent.max_neighbors = 12
+			nav_agent.radius = 40.0
+			nav_agent.neighbor_distance = 160.0
+			nav_agent.max_neighbors = 16
 			nav_agent.velocity_computed.connect(_on_navigation_velocity_computed)
 
 func _physics_process(delta: float) -> void:
@@ -44,6 +44,8 @@ func _physics_process(delta: float) -> void:
 		if _enemy_scan_timer <= 0.0:
 			_enemy_scan_timer = 1.0
 			if not is_instance_valid(attack_target):
+				attack_target = _find_nearest_opponent()
+			elif not has_move_order and global_position.distance_to(attack_target.global_position) > 600.0:
 				attack_target = _find_nearest_opponent()
 
 	if is_instance_valid(attack_target):

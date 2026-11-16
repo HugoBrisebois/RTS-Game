@@ -25,6 +25,11 @@ shape = SubResource("RectangleShape2D_1x8e5")
 [node name="Sprite2D" type="Sprite2D" parent="." index="1" unique_id=1801249996]
 texture = ExtResource("2_rjj26")
 
+[node name="NavigationObstacle2D" parent="." index="2" unique_id=741604712]
+vertices = PackedVector2Array(16, 104, 75, 102, 138, 102, 136, -77, -145, -81, -147, 100, 2, 103)
+affect_navigation_mesh = true
+carve_navigation_mesh = true
+
 [node name="CollisionShape2D" parent="InteractionArea" parent_id_path=PackedInt32Array(869779884) index="0" unique_id=1127670049]
 position = Vector2(-0.5, 11.875)
 shape = SubResource("RectangleShape2D_4npm0")

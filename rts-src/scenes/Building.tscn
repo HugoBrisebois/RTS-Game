@@ -9,11 +9,13 @@ size = Vector2(311, 208)
 script = ExtResource("1_bly62")
 
 [node name="CollisionShape2D2" type="CollisionShape2D" parent="." unique_id=295892693]
-position = Vector2(-0.5, 19)
+position = Vector2(-0.5, 0)
 shape = SubResource("RectangleShape2D_qqcy4")
+
+[node name="NavigationObstacle2D" type="NavigationObstacle2D" parent="." unique_id=741604712]
 
 [node name="InteractionArea" type="Area2D" parent="." unique_id=869779884]
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="InteractionArea" unique_id=1127670049]
-position = Vector2(-0.5, 19)
+position = Vector2(0, 1)
 shape = SubResource("RectangleShape2D_qqcy4")

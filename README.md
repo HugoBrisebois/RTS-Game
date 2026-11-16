@@ -6,9 +6,10 @@ pack by Pixel Frog.
 ## Current playable prototype
 
 The match starts with a player castle, two workers, resource nodes, an enemy
-castle, and an enemy unit. Gather resources, train workers, build a defensive
-barracks, and destroy the enemy castle to win. Losing the player castle ends the
-match in defeat.
+castle, and an enemy barracks. The enemy earns resources over time and sends
+capped warrior raids from its barracks; the barracks also attacks nearby
+opponents. Gather resources, train workers, build defenses, and destroy the
+enemy castle to win. Losing the player castle ends the match in defeat.
 
 ## Controls
 

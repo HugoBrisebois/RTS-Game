@@ -239,4 +239,4 @@ scale = Vector2(0.82812506, 0.92187506)
 sprite_frames = SubResource("SpriteFrames_4npm0")
 animation = &"run"
 autoplay = "idle"
-frame_progress = 0.5007959
+frame_progress = 0.9839767
